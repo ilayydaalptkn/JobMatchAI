@@ -173,39 +173,46 @@
             }
 
             try {
-                // DOĞRU ADRES: /api/Kimlik/giris olarak güncellendi!
                 const cevap = await fetch(`${BASE_URL}/api/Kimlik/giris`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    // Backend'deki GirisModeli ile tam uyması için key isimlerini güncelledik
-                    body: JSON.stringify({ Eposta: email, Sifre: sifre })
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    // 🚨 C# tarafındaki 'GirisModeli' class'ı ile tam uyuşması şart:
+                    body: JSON.stringify({ "Eposta": email, "Sifre": sifre })
                 });
 
                 if (cevap.ok) {
                     const veri = await cevap.json();
-                    // KimlikController'dan dönen küçük harfli (id, adSoyad, rol...) alanları yakalıyoruz
+
                     const temizKullanici = {
-                        kullaniciId: veri.id || 5,
-                        adSoyad: veri.adSoyad || "Kullanıcı",
-                        rol: veri.rol || "Ogrenci",
-                        sehir: veri.sehir || "Ankara",
-                        eposta: veri.eposta || email,
-                        token: veri.token || "mock_token"
+                        kullaniciId: veri.id || veri.Id || 5,
+                        adSoyad: veri.adSoyad || veri.AdSoyad || "Kullanıcı",
+                        rol: veri.rol || veri.Rol || "Ogrenci",
+                        sehir: veri.sehir || veri.Sehir || "Ankara",
+                        eposta: veri.eposta || veri.Eposta || email,
+                        token: veri.token || veri.Token || "mock_token"
                     };
 
                     localStorage.setItem("girisYapanKullanici", JSON.stringify(temizKullanici));
                     alert(`👋 Hoş geldiniz, ${temizKullanici.adSoyad}!`);
                     window.location.href = "index.html";
                 } else {
-                    alert("❌ Giriş Başarısız: E-posta veya şifre hatalı.");
+                    const hataMesaji = await cevap.text();
+                    alert("❌ Giriş Başarısız: " + (hataMesaji || "E-posta veya şifre hatalı."));
                 }
             } catch (e) {
-                // Sunucu kapalıysa yerel simülasyon kontrolü
                 let yerelKullanicilar = JSON.parse(localStorage.getItem("mock_kullanicilar")) || [];
-                let bulunan = yerelKullanicilar.find(u => u.Eposta.toLowerCase() === email.toLowerCase() && u.Sifre === sifre);
+                let bulunan = yerelKullanicilar.find(u => u.Eposta && u.Eposta.toLowerCase() === email.toLowerCase() && u.Sifre === sifre);
                 if (bulunan) {
                     const temizKullanici = {
-                        kullaniciId: bulunan.Id, adSoyad: bulunan.AdSoyad, rol: bulunan.Rol, sehir: bulunan.Sehir, eposta: bulunan.Eposta, token: "mock_token"
+                        kullaniciId: bulunan.Id || 999,
+                        adSoyad: bulunan.AdSoyad,
+                        rol: bulunan.Rol,
+                        sehir: bulunan.Sehir,
+                        eposta: bulunan.Eposta,
+                        token: "mock_token"
                     };
                     localStorage.setItem("girisYapanKullanici", JSON.stringify(temizKullanici));
                     alert(`👋 Hoş geldiniz (Yerel Mod), ${temizKullanici.adSoyad}!`);
@@ -229,6 +236,7 @@
                 return;
             }
 
+            // 🚨 KRİTİK: Id alanını tamamen sildik. Kolon isimlerini backend modelinle birebir eşitledik.
             const kayitVerisi = {
                 "AdSoyad": adSoyad,
                 "Eposta": email,
@@ -239,17 +247,19 @@
             };
 
             let yerelKullanicilar = JSON.parse(localStorage.getItem("mock_kullanicilar")) || [];
-            if (yerelKullanicilar.some(u => u.Eposta.toLowerCase() === email.toLowerCase())) {
+            if (yerelKullanicilar.some(u => u.Eposta && u.Eposta.toLowerCase() === email.toLowerCase())) {
                 alert("❌ Kayıt Başarısız: Bu e-posta adresiyle daha önce kayıt olunmuş!");
                 return;
             }
 
             try {
-                // DOĞRU ADRES: /api/Kimlik/kayit olarak güncellendi!
                 const cevap = await fetch(`${BASE_URL}/api/Kimlik/kayit`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(kayitVerisi)
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify(kayitVerisi) // Direkt objeyi basıyoruz
                 });
 
                 if (cevap.ok) {
@@ -259,7 +269,7 @@
                     switchTab('login');
                 } else {
                     const hataMetni = await cevap.text();
-                    alert("❌ Kayıt Başarısız: " + (hataMetni || "Veri şeması uyuşmazlığı."));
+                    alert("❌ Kayıt Başarısız: " + hataMetni);
                 }
             } catch (e) {
                 yerelKullanicilar.push(kayitVerisi);
