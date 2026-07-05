@@ -78,6 +78,7 @@
 
     <script>
         const BASE_URL = "https://jobmatchai-kmfs.onrender.com";
+
         function switchTab(tab) {
             const formLogin = document.getElementById("formLogin");
             const formRegister = document.getElementById("formRegister");
@@ -170,7 +171,8 @@
             }
 
             try {
-                const cevap = await fetch(`https://localhost:44303/api/Basvuru/login`, {
+                // Render linkini ve senin endpoint yolunu birleştirdik kanka
+                const cevap = await fetch(`${BASE_URL}/api/Basvuru/login`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ eposta: email, sifre: sifre })
@@ -190,12 +192,12 @@
 
                     localStorage.setItem("girisYapanKullanici", JSON.stringify(temizKullanici));
                     alert(`👋 Hoş geldiniz, ${temizKullanici.adSoyad}!`);
-                    window.location.href = "index.html";
+                    window.location.href = "index.html"; // Artık ana dizindeki index'e uçacak
                 } else {
                     alert("❌ Giriş Başarısız: E-posta veya şifre hatalı.");
                 }
             } catch (e) {
-                // Lokal Test Mocking Mekanizması
+                // Sunucu kapalıyken veya hata aldığında mock hesap kontrolü
                 let yerelKullanicilar = JSON.parse(localStorage.getItem("mock_kullanicilar")) || [];
                 let bulunan = yerelKullanicilar.find(u => u.Eposta === email && u.Sifre === sifre);
                 if (bulunan) {
@@ -235,15 +237,15 @@
                 "KayitTarihi": new Date().toISOString()
             };
 
-            // E-posta mükerrerlik yerel simülasyon kontrolü
             let yerelKullanicilar = JSON.parse(localStorage.getItem("mock_kullanicilar")) || [];
             if (yerelKullanicilar.some(u => u.Eposta.toLowerCase() === email.toLowerCase())) {
-                alert("❌ Kayıt Başarısız: Bu e-posta adresiyle daha önce kayıt olunmuş! Lütfen başka bir mail deneyin.");
+                alert("❌ Kayıt Başarısız: Bu e-posta adresiyle daha önce kayıt olunmuş!");
                 return;
             }
 
             try {
-                const cevap = await fetch(`${window.location.origin}/api/Kimlik/kayit`, {
+                // Buradaki origin hatasını da Render BASE_URL ile düzelttim kanka
+                const cevap = await fetch(`${BASE_URL}/api/Kimlik/kayit`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(kayitVerisi)
@@ -256,12 +258,12 @@
                     switchTab('login');
                 } else {
                     const hataMetni = await cevap.text();
-                    alert("❌ Kayıt Başarısız: " + (hataMetni || "Böyle bir mail zaten mevcut olabilir veya eksik veri."));
+                    alert("❌ Kayıt Başarısız: " + (hataMetni || "Veri şeması uyuşmazlığı."));
                 }
             } catch (e) {
                 yerelKullanicilar.push(kayitVerisi);
                 localStorage.setItem("mock_kullanicilar", JSON.stringify(yerelKullanicilar));
-                alert("🎉 Sunucu çevrimdışı: Yerel havuz kaydı yapıldı! Giriş yapabilirsiniz.");
+                alert("🎉 Sunucu çevrimdışı: Yerel hafızaya (Mock) kaydınız yapıldı! Giriş yapabilirsiniz.");
                 switchTab('login');
             }
         }
