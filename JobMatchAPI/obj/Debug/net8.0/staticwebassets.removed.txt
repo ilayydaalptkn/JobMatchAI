@@ -1,0 +1,2 @@
+C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\wwwroot\login.html
+C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\wwwroot\index.html

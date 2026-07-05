@@ -69,11 +69,12 @@ app.UseStaticFiles();
 
 // CORS politikasını aktifleştiriyoruz (UseAuthorization ve MapControllers'dan önce olmalı)
 app.UseCors("HerKeseIzinVer");
+app.UseSwagger();
+app.UseSwaggerUI();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+   
 }
 
 app.UseHttpsRedirection();
