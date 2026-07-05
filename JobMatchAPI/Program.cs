@@ -4,17 +4,9 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
-// 1. JWT Kimlik Doğrulama Servisinin Eklenmesi
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddSwaggerGen(options =>
-{
-    // 🔥 ÇAKIŞMAI ENGELLEYEN SİHİRLİ SATIR: 
-    // Aynı rotaya sahip birden fazla metot olsa bile Swagger'ın çökmesini engeller.
-    options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
-});
-// --- 1. SERVİS TANIMLAMALARI (DEPENDENCY INJECTION) ---
 
-// CORS Ayarı: Front-end'in (HTML) tarayıcı engeline takılmadan API'ye erişmesini sağlar
+// --- 1. CORS VE GÜVENLİK AYARLARI (RENDER İÇİN EN BAŞA ALINDI) ---
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("HerKeseIzinVer", policy =>
@@ -23,6 +15,11 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
+});
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
 });
 
 builder.Services.AddAuthentication(options =>
@@ -34,55 +31,44 @@ builder.Services.AddAuthentication(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = false, // Test ortamı için false, canlıda token'ı basan site doğrulanır
-        ValidateAudience = false, // Test ortamı için false
-        ValidateLifetime = true, // Süresi dolmuş token'ları reddet
-        ValidateIssuerSigningKey = true, // İmza doğrulaması yap
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("BuSizinCokGizliVeGuvenliKriptografikAnahtarinizdir123!")) // En az 32 karakter olmalı
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("BuSizinCokGizliVeGuvenliKriptografikAnahtarinizdir123!"))
     };
 });
 
-// Front-end ile JSON uyumluluğunu en üst seviyeye çıkaran Controller ayarı
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // Özellik isimlerini (Property) C# modelinde yazıldığı gibi (büyük/küçük harf değiştirmeden) bırakır
         options.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
 
-// Swagger/OpenAPI Dökümantasyon Servisleri
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
-// Veritabanı Servisi (PostgreSQL Bağlantısı)
 builder.Services.AddDbContext<VeriTabaniBaglantisi>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Canlı Bot ile İlan Kazıma Arka Plan Servisi (HostedService)
 builder.Services.AddHostedService<JobMatchAPI.ArkaPlanServisleri.TumSitelerBotServisi>();
 
 var app = builder.Build();
 
 // --- 2. MIDDLEWARE SIRALAMASI (HTTP PIPELINE) ---
-
 app.UseStaticFiles();
 
-// CORS politikasını aktifleştiriyoruz (UseAuthorization ve MapControllers'dan önce olmalı)
+// 🚨 CRITICAL: CORS mutlaka Authentication ve Routing işlemlerinden önce tetiklenmelidir!
 app.UseCors("HerKeseIzinVer");
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
-if (app.Environment.IsDevelopment())
-{
-   
-}
+// 🚨 RENDER İÇİN ÖNEMLİ: HTTPS Redirection tamamen kaldırıldı! Çünkü Render trafiği zaten kendisi HTTPS'e zorlar.
+// Sunucu içinde tekrar yönlendirme yapmak sonsuz döngüye (Infinite Loop) ve çökmeye yol açar.
 
-app.UseHttpsRedirection();
-app.UseAuthentication(); // 👈 Bunu mutlaka ekle kanka
+app.UseAuthentication();
 app.UseAuthorization();
 
-
-// Kontrolcü (Controller) rotalarını eşleştirme
 app.MapControllers();
 
 // --- 3. HAZIR VERİ BESLEME SİSTEMİ (DATA SEEDING) ---
@@ -94,11 +80,8 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<VeriTabaniBaglantisi>();
         context.Database.EnsureCreated();
 
-        // Eğer veritabanındaki ilan tablosu boş veya yetersizse verileri otomatik simüle et
         if (context.Ilanlar.Count() <= 2)
         {
-            Console.WriteLine("[SİSTEM]: Çoklu kariyer sitelerinden ilan çekme simülasyonu başlatıldı...");
-
             var hazirIlanlar = new List<JobMatchAPI.Models.Ilan>
             {
                 new JobMatchAPI.Models.Ilan {
@@ -116,37 +99,16 @@ using (var scope = app.Services.CreateScope())
                     Aciklama = "Aranan Kriterler: React.js, Tailwind CSS, TypeScript, Redux. Modern arayüz mimarilerine hakim, kullanıcı deneyimine önem veren takım arkadaşı.",
                     Maas = "Dolgun Ücret",
                     YayinlanmaTarihi = DateTime.UtcNow
-                },
-                new JobMatchAPI.Models.Ilan {
-                    Baslik = "Senior Backend Software Expert",
-                    SirketAdi = "FinansTek Bankacılık (Indeed'den Alındı)",
-                    Sehir = "Ankara",
-                    Aciklama = "Aranan Kriterler: Senior .NET Core, Mikroservisler, Docker, RabbitMQ. En az 5 yıl kurumsal bankacılık projelerinde deneyim sahibi uzman.",
-                    Maas = "Yüksek Skala",
-                    YayinlanmaTarihi = DateTime.UtcNow
-                },
-                new JobMatchAPI.Models.Ilan {
-                    Baslik = ".NET Backend Stajyeri (Uzaktan)",
-                    SirketAdi = "Ar-Ge İnovasyon A.Ş. (Github Jobs'tan Alındı)",
-                    Sehir = "İzmir",
-                    Aciklama = "Aranan Kriterler: C#, Web API, OOP mantığı. Tamamen uzaktan (Fully Remote) çalışacak, haftada en az 3 gün devam edebilecek stajyer arayışımız vardır.",
-                    Maas = "Stajyer Ödeneği",
-                    YayinlanmaTarihi = DateTime.UtcNow
                 }
             };
 
             foreach (var ilan in hazirIlanlar)
             {
-                // Aynı şirkete ait aynı başlıklı mükerrer ilan kontrolü
                 bool varMi = context.Ilanlar.Any(i => i.Baslik.ToLower() == ilan.Baslik.ToLower() && i.SirketAdi.ToLower() == ilan.SirketAdi.ToLower());
-                if (!varMi)
-                {
-                    context.Ilanlar.Add(ilan);
-                }
+                if (!varMi) context.Ilanlar.Add(ilan);
             }
 
             await context.SaveChangesAsync();
-            Console.WriteLine("[SİSTEM]: Kariyer.net, LinkedIn ve Indeed havuzundan toplam 4 yeni benzersiz ilan sisteme enjekte edildi!");
         }
     }
     catch (Exception ex)

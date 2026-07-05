@@ -2,6 +2,9 @@
 using JobMatchAPI.Data;
 using JobMatchAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace JobMatchAPI.Controllers
 {
@@ -16,7 +19,6 @@ namespace JobMatchAPI.Controllers
             _veriTabani = veriTabani;
         }
 
-        // 1. KAYIT OLMA SİSTEMİ (POST: api/Kimlik/kayit)
         [HttpPost("kayit")]
         public async Task<IActionResult> KayitOl([FromBody] Kullanici yeniKullanici)
         {
@@ -27,14 +29,12 @@ namespace JobMatchAPI.Controllers
                     return BadRequest("Geçersiz kullanıcı verisi!");
                 }
 
-                // E-posta adresi sistemde zaten var mı kontrolü
                 var epostaVarMi = await _veriTabani.Kullanicilar.AnyAsync(k => k.Eposta.ToLower() == yeniKullanici.Eposta.ToLower());
                 if (epostaVarMi) return BadRequest("Bu e-posta adresi zaten kullanımda!");
 
-                // Rol doğrulama (Güvenlik kontrolü)
                 if (yeniKullanici.Rol != "Ogrenci" && yeniKullanici.Rol != "Isveren")
                 {
-                    yeniKullanici.Rol = "Ogrenci"; // Hatalı bir şey gelirse varsayılan öğrenci atansın
+                    yeniKullanici.Rol = "Ogrenci";
                 }
 
                 _veriTabani.Kullanicilar.Add(yeniKullanici);
@@ -48,8 +48,6 @@ namespace JobMatchAPI.Controllers
             }
         }
 
-        // 2. GİRİŞ YAPMA SİSTEMİ (POST: api/Kimlik/giris)
-        // ÇÖZÜM: Çift olan HttpPost kaldırıldı, tek satıra düşürüldü.
         [HttpPost("giris")]
         public async Task<IActionResult> GirisYap([FromBody] GirisModeli model)
         {
@@ -63,16 +61,34 @@ namespace JobMatchAPI.Controllers
                 string arananEposta = model.Eposta.Trim().ToLower();
                 string arananSifre = model.Sifre.Trim();
 
-                // Veritabanındaki pürüzsüz Türkçe kolon eşleşmesi
                 var kullanici = await _veriTabani.Kullanicilar
                     .FirstOrDefaultAsync(k => k.Eposta.ToLower() == arananEposta && k.Sifre == arananSifre);
 
                 if (kullanici == null)
                     return BadRequest("E-posta adresi veya şifre hatalı!");
 
+                var claims = new[]
+                {
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, kullanici.Id.ToString()),
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Email, kullanici.Eposta ?? ""),
+                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, kullanici.Rol ?? "Ogrenci")
+                };
+
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("BuSizinCokGizliVeGuvenliKriptografikAnahtarinizdir123!"));
+                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+                var token = new JwtSecurityToken(
+                    claims: claims,
+                    expires: DateTime.UtcNow.AddDays(1),
+                    signingCredentials: creds
+                );
+
+                var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
                 return Ok(new
                 {
                     mesaj = "Giriş başarılı!",
+                    token = tokenString,
                     id = kullanici.Id,
                     adSoyad = kullanici.AdSoyad,
                     eposta = kullanici.Eposta,
@@ -87,7 +103,6 @@ namespace JobMatchAPI.Controllers
         }
     }
 
-    // ÇÖZÜM: Karmaşıklaşan yardımcı sınıf tamamen temiz ve %100 Türkçe string alanlara dönüştürüldü.
     public class GirisModeli
     {
         public string Eposta { get; set; } = string.Empty;

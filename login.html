@@ -11,7 +11,7 @@
     <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
         <div class="text-center mb-8">
             <h1 class="text-3xl font-black text-blue-600 tracking-wide">🚀 JobMatch</h1>
-            <p class="text-gray-500 text-sm mt-1">Geleceğin Staj Ağına Hoş Geldiniz</p>
+            <p class="text-gray-500 text-sm mt-1">Geleceğin Staj Ağına Hoş geldiniz</p>
         </div>
 
         <div class="flex border-b border-gray-100 mb-6">
@@ -77,6 +77,7 @@
     </div>
 
     <script>
+        // CANLI BACKEND URL (Localhost kalıntıları tamamen elendi kanka)
         const BASE_URL = "https://jobmatchai-kmfs.onrender.com";
 
         function switchTab(tab) {
@@ -161,6 +162,7 @@
             }
         }
 
+     
         async function istekGirisYap() {
             const email = document.getElementById("loginEmail").value.trim();
             const sifre = document.getElementById("loginSifre").value.trim();
@@ -171,23 +173,24 @@
             }
 
             try {
-                // İŞTE BURASI! Localhost tamamen kalktı, Render url'i olan BASE_URL geldi:
-                const cevap = await fetch(`${BASE_URL}/api/Basvuru/login`, {
+                // DOĞRU ADRES: /api/Kimlik/giris olarak güncellendi!
+                const cevap = await fetch(`${BASE_URL}/api/Kimlik/giris`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ eposta: email, sifre: sifre })
+                    // Backend'deki GirisModeli ile tam uyması için key isimlerini güncelledik
+                    body: JSON.stringify({ Eposta: email, Sifre: sifre })
                 });
 
                 if (cevap.ok) {
                     const veri = await cevap.json();
+                    // KimlikController'dan dönen küçük harfli (id, adSoyad, rol...) alanları yakalıyoruz
                     const temizKullanici = {
-                        kullaniciId: veri.kullaniciId || veri.Id || veri.id || 5,
-                        adSoyad: veri.adSoyad || veri.AdSoyad || "Kullanıcı",
-                        rol: veri.rol || veri.Rol || "Ogrenci",
-                        sehir: veri.sehir || veri.Sehir || "Ankara",
+                        kullaniciId: veri.id || 5,
+                        adSoyad: veri.adSoyad || "Kullanıcı",
+                        rol: veri.rol || "Ogrenci",
+                        sehir: veri.sehir || "Ankara",
                         eposta: veri.eposta || email,
-                        telefon: veri.telefon || veri.Telefon || "05550000000",
-                        token: veri.token
+                        token: veri.token || "mock_token"
                     };
 
                     localStorage.setItem("girisYapanKullanici", JSON.stringify(temizKullanici));
@@ -197,12 +200,12 @@
                     alert("❌ Giriş Başarısız: E-posta veya şifre hatalı.");
                 }
             } catch (e) {
-                // Sunucu kapalıyken veya hata aldığında mock hesap kontrolü
+                // Sunucu kapalıysa yerel simülasyon kontrolü
                 let yerelKullanicilar = JSON.parse(localStorage.getItem("mock_kullanicilar")) || [];
-                let bulunan = yerelKullanicilar.find(u => u.Eposta === email && u.Sifre === sifre);
+                let bulunan = yerelKullanicilar.find(u => u.Eposta.toLowerCase() === email.toLowerCase() && u.Sifre === sifre);
                 if (bulunan) {
                     const temizKullanici = {
-                        kullaniciId: bulunan.Id, adSoyad: bulunan.AdSoyad, rol: bulunan.Rol, sehir: bulunan.Sehir, eposta: bulunan.Eposta, telefon: bulunan.Telefon || "05550000000", token: "mock_token"
+                        kullaniciId: bulunan.Id, adSoyad: bulunan.AdSoyad, rol: bulunan.Rol, sehir: bulunan.Sehir, eposta: bulunan.Eposta, token: "mock_token"
                     };
                     localStorage.setItem("girisYapanKullanici", JSON.stringify(temizKullanici));
                     alert(`👋 Hoş geldiniz (Yerel Mod), ${temizKullanici.adSoyad}!`);
@@ -227,14 +230,12 @@
             }
 
             const kayitVerisi = {
-                "Id": Date.now(),
                 "AdSoyad": adSoyad,
                 "Eposta": email,
                 "Telefon": telefon,
                 "Sifre": sifre,
                 "Sehir": sehir,
-                "Rol": rol,
-                "KayitTarihi": new Date().toISOString()
+                "Rol": rol
             };
 
             let yerelKullanicilar = JSON.parse(localStorage.getItem("mock_kullanicilar")) || [];
@@ -244,7 +245,7 @@
             }
 
             try {
-                // Buradaki window.location.origin hatası da tamamen temizlendi, BASE_URL'e bağlandı:
+                // DOĞRU ADRES: /api/Kimlik/kayit olarak güncellendi!
                 const cevap = await fetch(`${BASE_URL}/api/Kimlik/kayit`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -263,7 +264,7 @@
             } catch (e) {
                 yerelKullanicilar.push(kayitVerisi);
                 localStorage.setItem("mock_kullanicilar", JSON.stringify(yerelKullanicilar));
-                alert("🎉 Sunucu çevrimdışı: Yerel havuz kaydı yapıldı! Giriş yapabilirsiniz.");
+                alert("🎉 Sunucu çevrimdışı: Yerel hafızaya kaydınız yapıldı! Giriş yapabilirsiniz.");
                 switchTab('login');
             }
         }
