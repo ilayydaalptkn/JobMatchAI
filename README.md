@@ -37,7 +37,7 @@ Projenin geliştirilme sürecinde veri erişim katmanında (Data Access) şu kri
 
 ## 🚀 Kurulum ve Çalıştırma (Installation)
 
-🚀 [Uygulamayı Canlı Test Etmek İçin Tıklayın](https://ilayydaalptkn.github.io/JobMatchAI/wwwroot/index.html)
+🚀 [Uygulamayı Canlı Test Etmek İçin Tıklayın](https://ilayydaalptkn.github.io/JobMatchAI/index.html)
 
 1. Projeyi klonlayın:
    ```bash
