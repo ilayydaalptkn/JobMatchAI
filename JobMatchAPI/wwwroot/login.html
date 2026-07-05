@@ -1,0 +1,271 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobMatch - Giriş Paneli</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center font-sans">
+
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-black text-blue-600 tracking-wide">🚀 JobMatch</h1>
+            <p class="text-gray-500 text-sm mt-1">Geleceğin Staj Ağına Hoş Geldiniz</p>
+        </div>
+
+        <div class="flex border-b border-gray-100 mb-6">
+            <button id="btnTabLogin" onclick="switchTab('login')" class="w-1/2 pb-3 font-bold text-blue-600 border-b-2 border-blue-600 transition cursor-pointer text-center">Giriş Yap</button>
+            <button id="btnTabRegister" onclick="switchTab('register')" class="w-1/2 pb-3 font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition cursor-pointer text-center">Kayıt Ol</button>
+        </div>
+
+        <div id="formLogin" class="space-y-4">
+            <div>
+                <label class="text-xs font-bold text-gray-500 uppercase">E-Posta</label>
+                <input type="email" id="loginEmail" class="w-full mt-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="ornek@email.com">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-gray-500 uppercase">Şifre</label>
+                <input type="password" id="loginSifre" class="w-full mt-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="••••••••">
+            </div>
+            <button onclick="istekGirisYap()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-md cursor-pointer mt-2">Sisteme Giriş Yap</button>
+        </div>
+
+        <div id="formRegister" class="space-y-4 hidden">
+            <div>
+                <label class="text-xs font-bold text-gray-500 uppercase">Adınız Soyadınız / Şirket Adı</label>
+                <input type="text" id="regAd" class="w-full mt-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Ahmet Yılmaz Veya Tusaş">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-gray-500 uppercase">E-Posta</label>
+                <input type="email" id="regEmail" class="w-full mt-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="ornek@email.com">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-gray-500 uppercase">Telefon Numarası (CV İletişim İçin Zorunlu)</label>
+                <input type="tel" id="regTelefon" class="w-full mt-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="05551234567">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-gray-500 uppercase">Şifre</label>
+                <input type="password" id="regSifre" oninput="sifreGucunuKontrolEt()" class="w-full mt-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="••••••••">
+
+                <div class="w-full bg-gray-200 h-1.5 rounded-full mt-2 overflow-hidden hidden" id="gucBarKutusu">
+                    <div id="gucBari" class="h-full w-0 transition-all duration-300"></div>
+                </div>
+
+                <div class="flex justify-between items-center mt-1 text-[11px]">
+                    <span id="gucMetni" class="font-bold text-gray-400"></span>
+                    <span id="kriterUyarisi" class="text-red-500 font-bold hidden">⚠️ Kriterler eksik!</span>
+                </div>
+
+                <p class="text-[10px] text-gray-400 mt-1 leading-tight">
+                    En az 8 karakter; büyük/küçük harf, sayı ve özel karakter (. , ! @ # $ vb.) zorunludur.
+                </p>
+            </div>
+            <div>
+                <label class="text-xs font-bold text-gray-500 uppercase">Şehir</label>
+                <input type="text" id="regSehir" class="w-full mt-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Ankara">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-gray-500 uppercase">Sistem Rolünüz</label>
+                <select id="regRol" class="w-full mt-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                    <option value="Ogrenci">🎓 Staj Arayan Öğrenci</option>
+                    <option value="Isveren">💼 İlan Yayınlayan İşveren</option>
+                </select>
+            </div>
+            <button id="btnKayitOl" onclick="istekKayitOl()" class="w-full bg-gray-300 text-gray-500 py-3 rounded-xl font-bold transition shadow-md cursor-not-allowed opacity-60 mt-2" disabled>Hesabımı Oluştur</button>
+        </div>
+    </div>
+
+    <script>
+        const BASE_API_URL = "https://localhost:44303/api/Basvuru";
+
+        function switchTab(tab) {
+            const formLogin = document.getElementById("formLogin");
+            const formRegister = document.getElementById("formRegister");
+            const btnLogin = document.getElementById("btnTabLogin");
+            const btnRegister = document.getElementById("btnTabRegister");
+
+            if (tab === 'login') {
+                formLogin.classList.remove("hidden");
+                formRegister.classList.add("hidden");
+                btnLogin.className = "w-1/2 pb-3 font-bold text-blue-600 border-b-2 border-blue-600 transition cursor-pointer text-center";
+                btnRegister.className = "w-1/2 pb-3 font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition cursor-pointer text-center";
+            } else {
+                formLogin.classList.add("hidden");
+                formRegister.classList.remove("hidden");
+                btnLogin.className = "w-1/2 pb-3 font-medium text-gray-400 border-b-2 border-transparent hover:text-gray-600 transition cursor-pointer text-center";
+                btnRegister.className = "w-1/2 pb-3 font-bold text-emerald-600 border-b-2 border-emerald-600 transition cursor-pointer text-center";
+            }
+        }
+
+        function sifreGucunuKontrolEt() {
+            const sifre = document.getElementById("regSifre").value;
+            const gucBarKutusu = document.getElementById("gucBarKutusu");
+            const gucBari = document.getElementById("gucBari");
+            const gucMetni = document.getElementById("gucMetni");
+            const kriterUyarisi = document.getElementById("kriterUyarisi");
+            const btnKayitOl = document.getElementById("btnKayitOl");
+
+            if (sifre.length === 0) {
+                gucBarKutusu.classList.add("hidden");
+                gucMetni.innerText = "";
+                kriterUyarisi.classList.add("hidden");
+                btnKayitOl.disabled = true;
+                btnKayitOl.className = "w-full bg-gray-300 text-gray-500 py-3 rounded-xl font-bold cursor-not-allowed opacity-60 mt-2";
+                return;
+            }
+
+            gucBarKutusu.classList.remove("hidden");
+
+            const enAzSekiz = sifre.length >= 8;
+            const buyukHarf = /[A-Z]/.test(sifre);
+            const kucukHarf = /[a-z]/.test(sifre);
+            const sayi = /[0-9]/.test(sifre);
+            const ozelKarakter = /[.,!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(sifre);
+
+            let skor = 0;
+            if (buyukHarf) skor++;
+            if (kucukHarf) skor++;
+            if (sayi) skor++;
+            if (ozelKarakter) skor++;
+            if (enAzSekiz && skor > 0) skor++;
+
+            const tamGuyenliMi = enAzSekiz && buyukHarf && kucukHarf && sayi && ozelKarakter;
+
+            if (skor <= 2) {
+                gucBari.className = "h-full bg-red-500 transition-all duration-300";
+                gucBari.style.width = "25%";
+                gucMetni.innerText = "🔴 Zayıf";
+            } else if (skor === 3) {
+                gucBari.className = "h-full bg-amber-500 transition-all duration-300";
+                gucBari.style.width = "50%";
+                gucMetni.innerText = "🟡 Orta";
+            } else if (skor === 4) {
+                gucBari.className = "h-full bg-blue-500 transition-all duration-300";
+                gucBari.style.width = "75%";
+                gucMetni.innerText = "🔵 İyi";
+            } else if (skor === 5) {
+                gucBari.className = "h-full bg-emerald-500 transition-all duration-300";
+                gucBari.style.width = "100%";
+                gucMetni.innerText = "🟢 Mükemmel";
+            }
+
+            if (tamGuyenliMi) {
+                kriterUyarisi.classList.add("hidden");
+                btnKayitOl.disabled = false;
+                btnKayitOl.className = "w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition shadow-md cursor-pointer mt-2 opacity-100";
+            } else {
+                kriterUyarisi.classList.remove("hidden");
+                btnKayitOl.disabled = true;
+                btnKayitOl.className = "w-full bg-gray-300 text-gray-500 py-3 rounded-xl font-bold cursor-not-allowed opacity-60 mt-2";
+            }
+        }
+
+        async function istekGirisYap() {
+            const email = document.getElementById("loginEmail").value.trim();
+            const sifre = document.getElementById("loginSifre").value.trim();
+
+            if (!email || !sifre) {
+                alert("⚠️ E-posta ve şifre alanlarını boş bırakamazsınız!");
+                return;
+            }
+
+            try {
+                const cevap = await fetch(`https://localhost:44303/api/Basvuru/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ eposta: email, sifre: sifre })
+                });
+
+                if (cevap.ok) {
+                    const veri = await cevap.json();
+                    const temizKullanici = {
+                        kullaniciId: veri.kullaniciId || veri.Id || veri.id || 5,
+                        adSoyad: veri.adSoyad || veri.AdSoyad || "Kullanıcı",
+                        rol: veri.rol || veri.Rol || "Ogrenci",
+                        sehir: veri.sehir || veri.Sehir || "Ankara",
+                        eposta: veri.eposta || email,
+                        telefon: veri.telefon || veri.Telefon || "05550000000",
+                        token: veri.token
+                    };
+
+                    localStorage.setItem("girisYapanKullanici", JSON.stringify(temizKullanici));
+                    alert(`👋 Hoş geldiniz, ${temizKullanici.adSoyad}!`);
+                    window.location.href = "index.html";
+                } else {
+                    alert("❌ Giriş Başarısız: E-posta veya şifre hatalı.");
+                }
+            } catch (e) {
+                // Lokal Test Mocking Mekanizması
+                let yerelKullanicilar = JSON.parse(localStorage.getItem("mock_kullanicilar")) || [];
+                let bulunan = yerelKullanicilar.find(u => u.Eposta === email && u.Sifre === sifre);
+                if (bulunan) {
+                    const temizKullanici = {
+                        kullaniciId: bulunan.Id, adSoyad: bulunan.AdSoyad, rol: bulunan.Rol, sehir: bulunan.Sehir, eposta: bulunan.Eposta, telefon: bulunan.Telefon || "05550000000", token: "mock_token"
+                    };
+                    localStorage.setItem("girisYapanKullanici", JSON.stringify(temizKullanici));
+                    alert(`👋 Hoş geldiniz (Yerel Mod), ${temizKullanici.adSoyad}!`);
+                    window.location.href = "index.html";
+                } else {
+                    alert("💥 Sunucu bağlantısı yok ve yerel hesap bulunamadı.");
+                }
+            }
+        }
+
+        async function istekKayitOl() {
+            const adSoyad = document.getElementById("regAd").value.trim();
+            const email = document.getElementById("regEmail").value.trim();
+            const telefon = document.getElementById("regTelefon").value.trim();
+            const sifre = document.getElementById("regSifre").value.trim();
+            const sehir = document.getElementById("regSehir").value.trim();
+            const rol = document.getElementById("regRol").value;
+
+            if (!adSoyad || !email || !telefon || !sifre || !sehir) {
+                alert("⚠️ Lütfen tüm alanları doldurun!");
+                return;
+            }
+
+            const kayitVerisi = {
+                "Id": Date.now(),
+                "AdSoyad": adSoyad,
+                "Eposta": email,
+                "Telefon": telefon,
+                "Sifre": sifre,
+                "Sehir": sehir,
+                "Rol": rol,
+                "KayitTarihi": new Date().toISOString()
+            };
+
+            // E-posta mükerrerlik yerel simülasyon kontrolü
+            let yerelKullanicilar = JSON.parse(localStorage.getItem("mock_kullanicilar")) || [];
+            if (yerelKullanicilar.some(u => u.Eposta.toLowerCase() === email.toLowerCase())) {
+                alert("❌ Kayıt Başarısız: Bu e-posta adresiyle daha önce kayıt olunmuş! Lütfen başka bir mail deneyin.");
+                return;
+            }
+
+            try {
+                const cevap = await fetch(`${window.location.origin}/api/Kimlik/kayit`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(kayitVerisi)
+                });
+
+                if (cevap.ok) {
+                    yerelKullanicilar.push(kayitVerisi);
+                    localStorage.setItem("mock_kullanicilar", JSON.stringify(yerelKullanicilar));
+                    alert("🎉 Kayıt başarılı! Şimdi giriş yapabilirsiniz.");
+                    switchTab('login');
+                } else {
+                    const hataMetni = await cevap.text();
+                    alert("❌ Kayıt Başarısız: " + (hataMetni || "Böyle bir mail zaten mevcut olabilir veya eksik veri."));
+                }
+            } catch (e) {
+                yerelKullanicilar.push(kayitVerisi);
+                localStorage.setItem("mock_kullanicilar", JSON.stringify(yerelKullanicilar));
+                alert("🎉 Sunucu çevrimdışı: Yerel havuz kaydı yapıldı! Giriş yapabilirsiniz.");
+                switchTab('login');
+            }
+        }
+    </script>
+</body>
+</html>

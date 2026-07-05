@@ -1,0 +1,778 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobMatch - AI Destekli Staj Yönetimi</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans min-h-screen text-gray-800 transition-colors duration-300">
+
+    <div id="bildirimKutusu" class="fixed top-20 right-6 z-50 space-y-3 max-w-sm w-full pointer-events-none"></div>
+
+    <nav class="bg-white border-b border-gray-100 sticky top-0 z-45 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+            <h1 class="text-2xl font-black text-blue-600 tracking-wide cursor-pointer hover:opacity-80 transition" onclick="window.location.reload()">🚀 JobMatch AI</h1>
+            <div class="flex items-center space-x-6">
+                <div class="bg-gray-50 px-4 py-2 rounded-xl border border-gray-100 flex items-center space-x-2">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span>
+                    <p class="text-xs font-bold text-gray-700">👤 <span id="aktifKullaniciAdi">Yükleniyor...</span> (<span id="aktifKullaniciSehir">-</span>) - <span id="aktifKullaniciRol">-</span></p>
+                </div>
+                <button onclick="oturumuKapat()" class="text-xs font-bold bg-red-50 text-red-600 px-3.5 py-2 rounded-xl hover:bg-red-100 transition cursor-pointer active:scale-95">Çıkış Yap</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <div id="ogrenciCvPanel" class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100 mb-8 hidden shadow-sm transition-all duration-300">
+            <div class="flex justify-between items-center mb-4 border-b border-blue-100 pb-2">
+                <h3 class="text-sm font-black text-blue-900 flex items-center gap-2">📄 Detaylı CV ve Profil Bilgileriniz</h3>
+                <button onclick="cvPaneliKapat()" class="text-gray-400 hover:text-gray-600 font-bold text-lg cursor-pointer">&times;</button>
+            </div>
+
+            <fieldset id="cvFormAlanlari" disabled class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 disabled:opacity-80">
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase">E-Posta Adresi *</label>
+                    <input type="email" id="cvEposta" class="w-full mt-1 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm disabled:bg-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase">Telefon Numarası *</label>
+                    <input type="tel" id="cvTelefon" class="w-full mt-1 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm disabled:bg-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none" placeholder="05551234567">
+                </div>
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase">Yaşadığı Şehir *</label>
+                    <input type="text" id="cvSehir" class="w-full mt-1 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm disabled:bg-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none" placeholder="Örn: İstanbul">
+                </div>
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase">Mezun Olunan / Okunan Okul & Bölüm *</label>
+                    <input type="text" id="cvOkul" class="w-full mt-1 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm disabled:bg-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none" placeholder="Örn: Ege Üni. - Bilgisayar Müh.">
+                </div>
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase">Hedeflenen Pozisyon / İstediği İş *</label>
+                    <input type="text" id="cvHedefIs" class="w-full mt-1 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm disabled:bg-gray-100 focus:ring-2 focus:ring-blue-400 focus:outline-none" placeholder="Örn: Backend Developer, Garson">
+                </div>
+            </fieldset>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 pt-4 border-t border-blue-100">
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase block mb-1">Yetenekler & Donanımlar</label>
+                    <div id="yetenekEklemeKutusu" class="flex gap-2 mb-2 hidden">
+                        <input type="text" id="yetenekInput" class="flex-1 px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none" placeholder="Örn: React, Excel">
+                        <button type="button" onclick="yetenekEkle()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer hover:bg-indigo-700 transition">+</button>
+                    </div>
+                    <div id="cvYetenekListesi" class="flex flex-wrap gap-1.5 min-h-8 p-2 bg-white/50 border border-dashed border-gray-200 rounded-xl"></div>
+                </div>
+
+                <div>
+                    <label class="text-[11px] font-bold text-gray-500 uppercase block mb-1">Geçmiş İş / Proje Tecrübeleri</label>
+                    <div id="tecrubeEklemeKutusu" class="flex gap-2 mb-2 hidden">
+                        <input type="text" id="tecrubeInput" class="flex-1 px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-xs focus:outline-none" placeholder="Örn: Otel - Garsonluk">
+                        <button type="button" onclick="tecrubeEkle()" class="bg-indigo-600 text-white px-3 py-1.5 rounded-xl font-bold text-xs cursor-pointer hover:bg-indigo-700 transition">+</button>
+                    </div>
+                    <div id="cvTecrubeListesi" class="space-y-1 min-h-8 p-2 bg-white/50 border border-dashed border-gray-200 rounded-xl"></div>
+                </div>
+            </div>
+
+            <div class="mt-5 flex justify-end gap-2">
+                <button type="button" id="btnCvDuzenlemeyiAc" onclick="cvDuzenlemeyiAc()" class="bg-amber-500 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-amber-600 transition text-xs shadow-sm cursor-pointer">✏️ Bilgileri Düzenle</button>
+                <button type="button" id="btnCvKaydet" onclick="profilBilgileriniGuncelle()" class="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition text-xs shadow-sm cursor-pointer hidden">💾 Değişiklikleri Kaydet</button>
+            </div>
+        </div>
+
+        <div id="isverenAdayHavuzuPanel" class="bg-white p-6 rounded-2xl border border-purple-100 mb-8 hidden shadow-md transition-all duration-300">
+            <div class="flex justify-between items-center mb-4 border-b border-purple-50 pb-2">
+                <div>
+                    <h3 class="text-sm font-black text-purple-950 flex items-center gap-2">👥 Global Yetenek & Aday Havuzu</h3>
+                    <p class="text-[11px] text-gray-400 mt-0.5">Sistemdeki öğrencileri filtreleyin ve doğrudan özgeçmişlerini inceleyin.</p>
+                </div>
+                <button onclick="document.getElementById('isverenAdayHavuzuPanel').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 font-bold text-lg cursor-pointer">&times;</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <input type="text" id="adayAramaYetenek" onkeyup="adayHavuzunuFiltrele()" placeholder="🔍 Yeteneğe göre ara (Örn: React, Servis, Excel)..." class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-400">
+                <input type="text" id="adayAramaSehir" onkeyup="adayHavuzunuFiltrele()" placeholder="📍 Şehre göre ara (Örn: İstanbul, Ankara)..." class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-purple-400">
+            </div>
+
+            <div id="adayKartlariAlani" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto pt-2">
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-2xl shadow-xs border border-gray-100 flex flex-col md:flex-row gap-4 items-center justify-between mb-8">
+            <div class="relative w-full md:w-1/3">
+                <input type="text" id="aramaInput" onkeyup="ilanlariFiltrele()" placeholder="Pozisyon, yetenek veya şirket adı ara..." class="w-full pl-4 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all">
+            </div>
+
+            <div class="flex flex-wrap gap-3 w-full md:w-auto items-center justify-end">
+                <select id="filtreSehir" onchange="ilanlariFiltrele()" class="px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none text-sm font-medium cursor-pointer">
+                    <option value="">📍 Tüm Şehirler</option>
+                    <option value="Ankara">Ankara</option>
+                    <option value="İstanbul">İstanbul</option>
+                    <option value="İzmir">İzmir</option>
+                </select>
+
+                <button id="isverenAdayHavuzuBtn" onclick="adayHavuzunuTetikle()" class="bg-purple-50 text-purple-700 text-xs font-bold px-4 py-3 rounded-xl border border-purple-100 hover:bg-purple-100 transition cursor-pointer active:scale-95 hidden">👥 Aday Havuzu</button>
+                <button id="benimIlanlarimBtn" onclick="sadeceBenimIlanlarimiGetir()" class="bg-blue-50 text-blue-700 text-xs font-bold px-4 py-3 rounded-xl border border-blue-100 hover:bg-blue-100 transition cursor-pointer active:scale-95 hidden">📌 İlanlarım</button>
+                <button id="cvDuzenleBtn" onclick="cvPaneliTetikle()" class="bg-indigo-50 text-indigo-700 text-xs font-bold px-4 py-3 rounded-xl border border-indigo-100 hover:bg-indigo-100 transition cursor-pointer active:scale-95 hidden">📄 Profilim / CV</button>
+                <button id="benimBasvurularimBtn" onclick="ogrenciBasvurulariniGetir()" class="bg-emerald-50 text-emerald-700 text-xs font-bold px-4 py-3 rounded-xl border border-emerald-100 hover:bg-emerald-100 transition cursor-pointer active:scale-95 hidden">💼 Başvurularım</button>
+                <button onclick="temizleFiltreler()" class="bg-gray-100 text-gray-600 text-xs font-bold px-4 py-3 rounded-xl hover:bg-gray-200 transition cursor-pointer active:scale-95">🔄 Temizle</button>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center mb-6">
+            <div>
+                <h2 id="anaBaslik" class="text-xl font-black text-gray-900 tracking-tight">Mevcut Staj Fırsatları</h2>
+                <p class="text-xs text-gray-400 font-medium mt-0.5"><span id="toplamIlanSayisi">0</span> Öğe Listeleniyor</p>
+            </div>
+        </div>
+
+        <div id="isverenPanel" class="bg-white p-6 rounded-2xl shadow-xs border border-gray-100 mb-8 hidden">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">📢 Yeni Staj İlanı Yayınla</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">İlan Başlığı</label>
+                    <input type="text" id="ilanBaslik" class="w-full mt-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm focus:outline-none" placeholder="Örn: Frontend Geliştirici veya Kıdemli Garson">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Şehir</label>
+                    <input type="text" id="ilanSehir" class="w-full mt-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm focus:outline-none" placeholder="Örn: İstanbul">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Maaş / Ücret Durumu</label>
+                    <input type="text" id="ilanMaas" class="w-full mt-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm focus:outline-none" placeholder="Örn: Asgari Ücret Veya Belirtilmemiş">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Şirket Adı</label>
+                    <input type="text" id="ilanSirket" class="w-full mt-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm" readonly>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="text-xs font-bold text-gray-500 uppercase">Aranan Nitelikler ve Açıklama</label>
+                    <textarea id="ilanAciklama" rows="3" class="w-full mt-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 text-sm focus:outline-none" placeholder="Adayda aradığınız özellikleri yazın... Örn: React, diksiyon, excel vb."></textarea>
+                </div>
+            </div>
+            <div class="mt-4 flex justify-end">
+                <button onclick="istekIlanYayinla()" class="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition shadow-xs cursor-pointer text-sm">🚀 İlanı Canlıya Al</button>
+            </div>
+        </div>
+
+        <div id="ilanlarKutusu" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+        <div id="detayModal" class="fixed inset-0 bg-black/40 backdrop-blur-xs hidden flex items-center justify-center z-50 p-4 transition-all">
+            <div class="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl transform transition-all scale-100">
+                <div class="flex justify-between items-start border-b pb-3">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 id="modalBaslik" class="text-xl font-black text-gray-900">İlan Başlığı</h3>
+                            <div id="modalAiBadge"></div>
+                        </div>
+                        <p id="modalSirket" class="text-xs text-gray-500 font-bold mt-1">Şirket Adı</p>
+                    </div>
+                    <button onclick="document.getElementById('detayModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-2xl font-bold cursor-pointer">&times;</button>
+                </div>
+                <div class="mt-4 space-y-3">
+                    <div class="flex gap-4 text-xs font-bold text-gray-600">
+                        <span class="bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md" id="modalSehir">📍 Şehir</span>
+                        <span class="bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-md" id="modalMaas">💵 Maaş</span>
+                    </div>
+                    <p id="modalAciklama" class="text-sm text-gray-600 leading-relaxed whitespace-pre-line bg-gray-50 p-4 rounded-xl border border-gray-100 max-h-60 overflow-y-auto">Açıklama</p>
+                </div>
+                <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-100">
+                    <button onclick="document.getElementById('detayModal').classList.add('hidden')" class="bg-gray-100 text-gray-600 px-4 py-2 rounded-xl font-bold text-xs hover:bg-gray-200 cursor-pointer">Kapat</button>
+                    <div id="isverenOzelAksiyonlar" class="hidden flex gap-2">
+                        <button id="btnBasvuranlar" class="bg-purple-600 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-purple-700 cursor-pointer transition">👥 Başvuranlar</button>
+                        <button id="btnIlanGuncelle" class="bg-yellow-500 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-yellow-600 cursor-pointer transition">✏️ Güncelle</button>
+                        <button id="btnIlanSil" class="bg-red-600 text-white px-4 py-2 rounded-xl font-bold text-xs hover:bg-red-700 cursor-pointer transition">🗑️ Sil</button>
+                    </div>
+                    <button id="btnOgrenciBasvuru" class="hidden bg-emerald-600 text-white px-6 py-2 rounded-xl font-bold text-xs hover:bg-emerald-700 cursor-pointer transition active:scale-95">🚀 Başvuru Yap</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="basvuranlarModal" class="fixed inset-0 bg-black/40 backdrop-blur-xs hidden flex items-center justify-center z-50 p-4">
+            <div class="bg-white rounded-2xl p-6 w-full max-w-3xl max-h-[85vh] overflow-y-auto shadow-2xl flex flex-col">
+                <div class="flex justify-between items-center mb-4 border-b pb-2 shrink-0">
+                    <h3 class="text-lg font-bold text-gray-800">👥 Bekleyen Aday Başvuruları</h3>
+                    <button onclick="document.getElementById('basvuranlarModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 font-bold text-xl cursor-pointer">&times;</button>
+                </div>
+
+                <div id="basvuranlarListesi" class="grid grid-cols-1 gap-4 overflow-y-auto pr-1"></div>
+
+                <div class="mt-6 border-t pt-4 shrink-0">
+                    <h4 class="text-sm font-black text-gray-400 uppercase tracking-wider mb-3">📁 Sonuçlandırılmış Başvurular Arşivi</h4>
+                    <div id="basvuruArsivListesi" class="grid grid-cols-1 gap-4 max-h-60 overflow-y-auto text-xs"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const BASE_URL = window.location.origin;
+        let globalToken = "";
+        let globalKullaniciId = null;
+        let globalRol = "";
+        let globalSirketAdi = "";
+        let aktifKullanici = null;
+        let tumIlanlarHavuzu = [];
+        let cvYetenekler = [];
+        let cvTecrubeler = [];
+        let cvDuzenlemeModuAktif = false;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const hamVeri = localStorage.getItem("girisYapanKullanici");
+
+            if (!hamVeri) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            aktifKullanici = JSON.parse(hamVeri);
+            globalToken = aktifKullanici.token || "";
+            globalKullaniciId = aktifKullanici.kullaniciId || aktifKullanici.Id || aktifKullanici.id || null;
+            globalRol = (aktifKullanici.rol || aktifKullanici.Rol || "").toLowerCase().trim();
+            globalSirketAdi = (aktifKullanici.adSoyad || aktifKullanici.AdSoyad || "").toLowerCase().trim();
+
+            document.getElementById("aktifKullaniciAdi").innerText = aktifKullanici.adSoyad || aktifKullanici.AdSoyad || "Bilinmeyen Kullanıcı";
+            document.getElementById("aktifKullaniciRol").innerText = (globalRol === "isveren") ? "İşveren" : "Öğrenci";
+
+            if (globalRol === "isveren") {
+                document.getElementById("benimIlanlarimBtn").classList.remove("hidden");
+                document.getElementById("isverenAdayHavuzuBtn").classList.remove("hidden");
+                const isverenPanel = document.getElementById("isverenPanel");
+                if (isverenPanel) {
+                    isverenPanel.classList.remove("hidden");
+                    document.getElementById("ilanSirket").value = aktifKullanici.adSoyad || aktifKullanici.AdSoyad || "";
+                }
+                document.getElementById("aktifKullaniciSehir").innerText = aktifKullanici.sehir || aktifKullanici.Sehir || "-";
+            } else {
+                document.getElementById("benimBasvurularimBtn").classList.remove("hidden");
+                document.getElementById("cvDuzenleBtn").classList.remove("hidden");
+
+                const kayitliKalıcıCv = localStorage.getItem(`cv_veri_${globalKullaniciId}`);
+                if (kayitliKalıcıCv) {
+                    const cvObje = JSON.parse(kayitliKalıcıCv);
+                    Object.assign(aktifKullanici, cvObje);
+                }
+
+                document.getElementById("cvEposta").value = aktifKullanici.eposta || "";
+                document.getElementById("cvTelefon").value = (aktifKullanici.telefon === "05550000000") ? "" : (aktifKullanici.telefon || "");
+                document.getElementById("cvSehir").value = aktifKullanici.cvSehir || "";
+                document.getElementById("cvOkul").value = aktifKullanici.cvOkul || "";
+                document.getElementById("cvHedefIs").value = aktifKullanici.cvHedefIs || "";
+
+                document.getElementById("aktifKullaniciSehir").innerText = aktifKullanici.cvSehir || "-";
+
+                cvYetenekler = aktifKullanici.cvYetenekler || [];
+                cvTecrubeler = aktifKullanici.cvTecrubeler || [];
+
+                if (aktifKullanici.cvOkul && aktifKullanici.cvHedefIs) {
+                    cvFormunuKilitle();
+                } else {
+                    cvDuzenlemeyiAc();
+                }
+
+                // 🔔 ÖĞRENCİ GİRİŞ YAPTIĞINDA CANLI BİLDİRİMLERİ TARAMA VE ÇIKARMA
+                canliTakipBildirimleriniKontrolEt();
+            }
+
+            tumIlanlariGetir();
+        });
+
+        // 🔔 SEÇENEK 2: CANLI BİLDİRİM VE TAKİP MOTORU
+        function canliTakipBildirimleriniKontrolEt() {
+            const globalBasvurular = JSON.parse(localStorage.getItem("global_basvuru_havuzu")) || [];
+            const benimBasvurularim = globalBasvurular.filter(b => b.kullaniciId == globalKullaniciId);
+
+            benimBasvurularim.forEach(b => {
+                // Eğer durum "Onaylandi" veya "Reddedildi" ise ve daha önce bu bildirim gösterilmediyse
+                if (b.durum !== "Beklemede") {
+                    const bildirimAnahtari = `bildirim_gosterildi_${b.id}_${b.durum}`;
+                    if (!localStorage.getItem(bildirimAnahtari)) {
+                        bildirimKutusuUret(b.sirketAdi, b.baslik, b.durum);
+                        localStorage.setItem(bildirimAnahtari, "true"); // Bir daha gösterilmesin
+                    }
+                }
+            });
+        }
+
+        function bildirimKutusuUret(sirket, ilan, durum) {
+            const kutu = document.getElementById("bildirimKutusu");
+            if (!kutu) return;
+
+            const div = document.createElement("div");
+            div.className = `p-4 rounded-2xl shadow-xl border border-white pointer-events-auto flex flex-col gap-1 transition-all duration-300 animate-slide-in transform ${durum === 'Onaylandi' ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white' : 'bg-gradient-to-r from-rose-500 to-red-600 text-white'
+                }`;
+
+            const baslikMetni = durum === 'Onaylandi' ? '🎉 Başvuru Güncellemesi (KABUL)' : '✕ Başvuru Güncellemesi (RED)';
+            const icerikMetni = durum === 'Onaylandi'
+                ? `Tebrikler! <b>${sirket.toUpperCase()}</b> firması, "${ilan}" başvurunuzu onayladı ve CV'nizi kilitledi!`
+                : `Maalesef, <b>${sirket.toUpperCase()}</b> firması "${ilan}" ilanı için başvurunuzu olumsuz sonuçlandırdı.`;
+
+            div.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-bold tracking-wide uppercase opacity-90">${baslikMetni}</span>
+                        <button onclick="this.parentElement.parentElement.remove()" class="text-white font-bold text-sm cursor-pointer opacity-70 hover:opacity-100">&times;</button>
+                    </div>
+                    <p class="text-xs leading-relaxed mt-1">${icerikMetni}</p>
+                `;
+            kutu.appendChild(div);
+
+            // 7 Saniye sonra ekrandan otomatik yumuşakça silinsin
+            setTimeout(() => { div.style.opacity = '0'; setTimeout(() => div.remove(), 300); }, 7000);
+        }
+
+        // 👥 SEÇENEK 3: İŞVEREN İÇİN GELİŞMİŞ ADAY HAVUZU PANELİ VE FİLTRELEME
+        function adayHavuzunuTetikle() {
+            const panel = document.getElementById("isverenAdayHavuzuPanel");
+            panel.classList.toggle("hidden");
+            if (!panel.classList.contains("hidden")) {
+                adayHavuzunuListele();
+            }
+        }
+
+        function adayHavuzunuListele() {
+            const alan = document.getElementById("adayKartlariAlani");
+            if (!alan) return;
+            alan.innerHTML = "";
+
+            // LocalStorage tarayarak içindeki tüm bağımsız `cv_veri_` anahtarlarını toplayalım
+            let tumAdaylar = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith("cv_veri_")) {
+                    const uId = key.replace("cv_veri_", "");
+                    const cvVerisi = JSON.parse(localStorage.getItem(key));
+
+                    // Öğrencinin adını bulmak için ana giriş tablosuna bakalım (veya mock ad)
+                    cvVerisi.id = uId;
+                    cvVerisi.adSoyad = cvVerisi.adSoyad || `Aday Öğrenci (ID:#${uId})`;
+                    tumAdaylar.push(cvVerisi);
+                }
+            }
+
+            if (tumAdaylar.length === 0) {
+                alan.innerHTML = `<div class="col-span-full text-center text-xs text-gray-400 py-4">Sistemde henüz detaylı CV profilini kaydetmiş öğrenci bulunmuyor.</div>`;
+                return;
+            }
+
+            // Filtreleri oku
+            const yetenekArama = document.getElementById("adayAramaYetenek").value.toLowerCase().trim();
+            const sehirArama = document.getElementById("adayAramaSehir").value.toLowerCase().trim();
+
+            let sayac = 0;
+            tumAdaylar.forEach(aday => {
+                const yeteneklerStr = (aday.cvYetenekler || []).join(", ").toLowerCase();
+                const sehirStr = (aday.cvSehir || "").toLowerCase();
+
+                if ((yetenekArama === "" || yeteneklerStr.includes(yetenekArama)) && (sehirArama === "" || sehirStr.includes(sehirArama))) {
+                    sayac++;
+                    const yHTML = (aday.cvYetenekler || []).map(y => `<span class="bg-purple-50 text-purple-700 text-[10px] px-1.5 py-0.5 rounded font-bold">${y}</span>`).join("");
+
+                    alan.innerHTML += `
+                            <div class="border border-purple-100 bg-purple-50/5 p-4 rounded-xl shadow-xs hover:shadow-md transition duration-200">
+                                <div class="flex justify-between items-start">
+                                    <h4 class="font-bold text-gray-900 text-xs">${aday.adSoyad}</h4>
+                                    <span class="bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded font-bold">📍 ${aday.cvSehir || '-'}</span>
+                                </div>
+                                <p class="text-[11px] text-gray-500 font-medium mt-1">🎯 Hedef: ${aday.cvHedefIs || '-'}</p>
+                                <p class="text-[11px] text-gray-400 mt-0.5">🎓 Okul: ${aday.cvOkul || '-'}</p>
+                                <div class="flex flex-wrap gap-1 mt-2.5 pt-2 border-t border-purple-50">${yHTML || '<span class="text-[10px] text-gray-400 italic">Yetenek girilmemiş</span>'}</div>
+                            </div>
+                        `;
+                }
+            });
+
+            if (sayac === 0) {
+                alan.innerHTML = `<div class="col-span-full text-center text-xs text-gray-400 py-4">Kriterlere uygun aday bulunamadı.</div>`;
+            }
+        }
+
+        function adayHavuzunuFiltrele() {
+            adayHavuzunuListele();
+        }
+
+        // ESKİ MEVCUT SİSTEM FONKSİYONLARI (KORUNAN ALANLAR)
+        function cvPaneliTetikle() { document.getElementById("ogrenciCvPanel").classList.toggle("hidden"); }
+        function cvPaneliKapat() { document.getElementById("ogrenciCvPanel").classList.add("hidden"); }
+
+        function cvDuzenlemeyiAc() {
+            cvDuzenlemeModuAktif = true;
+            document.getElementById("cvFormAlanlari").disabled = false;
+            document.getElementById("yetenekEklemeKutusu").classList.remove("hidden");
+            document.getElementById("tecrubeEklemeKutusu").classList.remove("hidden");
+            document.getElementById("btnCvKaydet").classList.remove("hidden");
+            document.getElementById("btnCvDuzenlemeyiAc").classList.add("hidden");
+            yetenekleriListele(); tecrubeleriListele();
+        }
+
+        function cvFormunuKilitle() {
+            cvDuzenlemeModuAktif = false;
+            document.getElementById("cvFormAlanlari").disabled = true;
+            document.getElementById("yetenekEklemeKutusu").classList.add("hidden");
+            document.getElementById("tecrubeEklemeKutusu").classList.add("hidden");
+            document.getElementById("btnCvKaydet").classList.add("hidden");
+            document.getElementById("btnCvDuzenlemeyiAc").classList.remove("hidden");
+            yetenekleriListele(); tecrubeleriListele();
+        }
+
+        function yetenekEkle() {
+            if (!cvDuzenlemeModuAktif) return;
+            const inp = document.getElementById("yetenekInput"); const deger = inp.value.trim();
+            if (deger && !cvYetenekler.includes(deger)) { cvYetenekler.push(deger); inp.value = ""; yetenekleriListele(); }
+        }
+        function yetenekSil(index) { if (!cvDuzenlemeModuAktif) return; cvYetenekler.splice(index, 1); yetenekleriListele(); }
+        function yetenekleriListele() {
+            const box = document.getElementById("cvYetenekListesi"); box.innerHTML = "";
+            cvYetenekler.forEach((y, i) => {
+                const silBtn = cvDuzenlemeModuAktif ? `<button type="button" onclick="yetenekSil(${i})" class="text-red-500 font-bold ml-1 cursor-pointer">&times;</button>` : '';
+                box.innerHTML += `<span class="bg-indigo-50 text-indigo-700 text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">${y} ${silBtn}</span>`;
+            });
+        }
+
+        function tecrubeEkle() {
+            if (!cvDuzenlemeModuAktif) return;
+            const inp = document.getElementById("tecrubeInput"); const deger = inp.value.trim();
+            if (deger && !cvTecrubeler.includes(deger)) { cvTecrubeler.push(deger); inp.value = ""; tecrubeleriListele(); }
+        }
+        function tecrubeSil(index) { if (!cvDuzenlemeModuAktif) return; cvTecrubeler.splice(index, 1); tecrubeleriListele(); }
+        function tecrubeleriListele() {
+            const box = document.getElementById("cvTecrubeListesi"); box.innerHTML = "";
+            cvTecrubeler.forEach((t, i) => {
+                const silBtn = cvDuzenlemeModuAktif ? `<button type="button" onclick="tecrubeSil(${i})" class="text-red-500 font-bold cursor-pointer">&times;</button>` : '';
+                box.innerHTML += `<div class="bg-gray-100 text-gray-700 text-[11px] p-1.5 rounded-lg flex justify-between items-center"><span>💼 ${t}</span>${silBtn}</div>`;
+            });
+        }
+
+        function profilBilgileriniGuncelle() {
+            const eposta = document.getElementById("cvEposta").value.trim();
+            const telefon = document.getElementById("cvTelefon").value.trim();
+            const sehir = document.getElementById("cvSehir").value.trim();
+            const okul = document.getElementById("cvOkul").value.trim();
+            const hedefIs = document.getElementById("cvHedefIs").value.trim();
+
+            if (!eposta || !telefon || !sehir || !okul || !hedefIs) { alert("⚠️ Yıldızlı (*) alanları doldurun!"); return; }
+
+            const kaliciCvPaketi = { eposta, telefon, cvSehir: sehir, cvOkul: okul, cvHedefIs: hedefIs, cvYetenekler, cvTecrubeler, adSoyad: aktifKullanici.adSoyad || aktifKullanici.AdSoyad };
+            localStorage.setItem(`cv_veri_${globalKullaniciId}`, JSON.stringify(kaliciCvPaketi));
+
+            Object.assign(aktifKullanici, kaliciCvPaketi);
+            localStorage.setItem("girisYapanKullanici", JSON.stringify(aktifKullanici));
+            document.getElementById("aktifKullaniciSehir").innerText = sehir;
+
+            alert("✅ CV Profiliniz Kalıcı Olarak Kaydedildi!");
+            cvFormunuKilitle(); tumIlanlariGetir();
+        }
+
+        function gelismisAiSkorunuHesapla(ilan, aday) {
+            if (!aday || !aday.cvHedefIs) return 0;
+            let skor = 15;
+            const ilanBaslik = (ilan.baslik || ilan.Baslik || "").toLowerCase().trim();
+            const ilanAciklama = (ilan.aciklama || ilan.Aciklama || "").toLowerCase().trim();
+            const ilanSehir = (ilan.sehir || ilan.Sehir || "").toLowerCase().trim();
+            const adayHedefIs = (aday.cvHedefIs || "").toLowerCase().trim();
+            const adaySehir = (aday.cvSehir || "").toLowerCase().trim();
+
+            const kokBul = (kelime) => kelime.replace(/(ci|ci|lik|lük|cü|m|li|cı|yi|cılar|leri)$/gi, '').substring(0, 5);
+            const ilanKelimeleri = ilanBaslik.split(/[\s,.\-\/]+/);
+            let rolEslesmesi = false;
+
+            ilanKelimeleri.forEach(k => {
+                if (k.length > 2) {
+                    const ikok = kokBul(k); const akok = kokBul(adayHedefIs);
+                    if (adayHedefIs.includes(k) || akok.includes(ikok) || ikok.includes(akok)) rolEslesmesi = true;
+                }
+            });
+            if (rolEslesmesi) skor += 35;
+
+            if (aday.cvYetenekler && aday.cvYetenekler.length > 0) {
+                let eslesenYetenekSayisi = 0;
+                aday.cvYetenekler.forEach(yetenek => {
+                    const yLow = yetenek.toLowerCase().trim();
+                    if (ilanAciklama.includes(yLow) || ilanBaslik.includes(yLow)) eslesenYetenekSayisi++;
+                });
+                skor += Math.min(30, eslesenYetenekSayisi * 15);
+            }
+
+            if (aday.cvTecrubeler && aday.cvTecrubeler.length > 0) {
+                let tecrubePuani = 0;
+                aday.cvTecrubeler.forEach(tecrube => {
+                    const tLow = tecrube.toLowerCase().trim();
+                    if (kokBul(ilanBaslik).split("").some(l => tLow.includes(l)) || tLow.split(" ").some(w => ilanAciklama.includes(w))) tecrubePuani += 10;
+                });
+                skor += Math.min(20, tecrubePuani);
+            }
+
+            if (adaySehir && ilanSehir && (adaySehir.includes(ilanSehir) || ilanSehir.includes(adaySehir))) skor += 15;
+            return Math.min(100, skor);
+        }
+
+        function aiDilimRozetiUret(skor) {
+            if (globalRol === "isveren") return `<span class="text-[11px] font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">🧠 AI Analiz</span>`;
+            if (!aktifKullanici || !aktifKullanici.cvHedefIs) return `<span class="text-[11px] font-bold bg-gray-200 text-gray-400 px-2 py-0.5 rounded-md">CV Girilmedi</span>`;
+            if (skor >= 80) return `<span class="text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-md">🔥 Mükemmel (%${skor})</span>`;
+            if (skor >= 55) return `<span class="text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200 px-2 py-0.5 rounded-md">✨ Yüksek (%${skor})</span>`;
+            if (skor >= 35) return `<span class="text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-md">⚖️ Orta (%${skor})</span>`;
+            return `<span class="text-[11px] font-bold bg-red-100 text-red-800 border border-red-200 px-2 py-0.5 rounded-md">❌ Düşük (%${skor})</span>`;
+        }
+
+        async function tumIlanlariGetir() {
+            let mockIlanlar = JSON.parse(localStorage.getItem("mock_ilanlar")) || [];
+            if (!mockIlanlar || mockIlanlar.length <= 1) {
+                mockIlanlar = [
+                    { Id: 101, KullaniciId: 99, Baslik: "Frontend Developer Stajyeri (React)", SirketAdi: "Tusaş Havacılık", Sehir: "Ankara", Maas: "Asgari Ücret", Aciklama: "Yazılım ekibimize katılacak React, JavaScript ve Tailwind CSS bilen azimli stajyerler arıyoruz." },
+                    { Id: 102, KullaniciId: 98, Baslik: "Restoran Servis Elemanı / Garson", SirketAdi: "Hilton Otel", Sehir: "İzmir", Maas: "Görüşülür", Aciklama: "Diksiyonu düzgün, insan ilişkileri kuvvetli, servis kurallarına hakim çalışma arkadaşları." },
+                    { Id: 103, KullaniciId: 97, Baslik: "Backend Developer (C# / .NET)", SirketAdi: "Trendyol Teknoloji", Sehir: "İstanbul", Maas: "Yemek + Yol + Ücret", Aciklama: "C#, .NET Core, SQL ve API konularına ilgili stajyer adayları." },
+                    { Id: 104, KullaniciId: 96, Baslik: "Ofis Yönetici ve Yönetim Asistanı", SirketAdi: "Koç Holding", Sehir: "İstanbul", Maas: "Asgari Ücret", Aciklama: "MS Office programlarını (Excel, Word) iyi kullanabilen kurumsal iletişim personeli." }
+                ];
+                localStorage.setItem("mock_ilanlar", JSON.stringify(mockIlanlar));
+            }
+            tumIlanlarHavuzu = mockIlanlar; ilanlariEkranaBas(tumIlanlarHavuzu);
+        }
+
+        function ilanlariEkranaBas(ilanListesi) {
+            const kutu = document.getElementById("ilanlarKutusu"); const sayac = document.getElementById("toplamIlanSayisi");
+            if (!kutu) return; if (sayac) sayac.innerText = ilanListesi.length; kutu.innerHTML = "";
+
+            if (!ilanListesi || ilanListesi.length === 0) {
+                kutu.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400">İlan bulunamadı.</div>`; return;
+            }
+
+            ilanListesi.forEach(ilan => {
+                const safeIlanJson = JSON.stringify(ilan).replace(/"/g, '&quot;').replace(/'/g, "\\'");
+                const ilanKullaniciId = ilan.kullaniciId || ilan.KullaniciId;
+                const ilanSirket = (ilan.sirketAdi || ilan.SirketAdi || "").toLowerCase().trim();
+                const isBenimIlanim = (ilanKullaniciId == globalKullaniciId) || (ilanSirket === globalSirketAdi);
+
+                const aiSkor = gelismisAiSkorunuHesapla(ilan, aktifKullanici);
+                const rozetHTML = isBenimIlanim ? `<span class="text-xs font-bold bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-md">✍️ Benim İlanım</span>` : aiDilimRozetiUret(aiSkor);
+
+                kutu.innerHTML += `
+                    <div class="bg-white p-6 rounded-2xl shadow-xs border ${isBenimIlanim ? 'border-emerald-200 bg-emerald-50/5' : 'border-gray-100'} flex flex-col justify-between hover:shadow-md hover:scale-[1.02] transform transition-all duration-300">
+                        <div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md">📍 ${ilan.sehir || ilan.Sehir}</span>
+                                ${rozetHTML}
+                            </div>
+                            <h3 class="text-md font-bold text-gray-900 mt-3">${ilan.baslik || ilan.Baslik}</h3>
+                            <p class="text-xs text-gray-600 font-medium mt-1">${ilan.sirketAdi || ilan.SirketAdi}</p>
+                            <p class="text-xs text-gray-400 mt-2 line-clamp-3">${ilan.aciklama || ilan.Aciklama}</p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center">
+                            <span class="text-xs text-emerald-600 font-bold">${ilan.maas || ilan.Mass || "Belirtilmemiş"}</span>
+                            <button onclick="ilanDetayGoster('${safeIlanJson}')" class="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-lg cursor-pointer hover:bg-blue-700 active:scale-95 transition-all">İncele</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function ilanSilIstek(ilanId) {
+            if (!confirm("❌ Kaldırmak istediğinize emin misiniz?")) return;
+            let yerelIlanlar = JSON.parse(localStorage.getItem("mock_ilanlar")) || [];
+            yerelIlanlar = yerelIlanlar.filter(i => (i.id || i.Id) != parseInt(ilanId));
+            localStorage.setItem("mock_ilanlar", JSON.stringify(yerelIlanlar));
+            tumIlanlarHavuzu = yerelIlanlar; document.getElementById("detayModal").classList.add("hidden");
+            alert("🗑️ İlan silindi!"); ilanlariEkranaBas(tumIlanlarHavuzu);
+        }
+
+        function ilanDetayGoster(ilanJsonStr) {
+            const ilan = JSON.parse(ilanJsonStr); const ilanId = ilan.id || ilan.Id;
+            const ilanKullaniciId = ilan.kullaniciId || ilan.KullaniciId; const ilanSirketAdi = (ilan.sirketAdi || ilan.SirketAdi || "").toLowerCase().trim();
+
+            document.getElementById("modalBaslik").innerText = ilan.baslik || ilan.Baslik;
+            document.getElementById("modalSirket").innerText = ilan.sirketAdi || ilan.SirketAdi;
+            document.getElementById("modalSehir").innerText = "📍 " + (ilan.sehir || ilan.Sehir);
+            document.getElementById("modalMaas").innerText = "💵 " + (ilan.maas || ilan.Maas || "Belirtilmemiş");
+            document.getElementById("modalAciklama").innerText = ilan.aciklama || ilan.Aciklama;
+
+            const mSkor = gelismisAiSkorunuHesapla(ilan, aktifKullanici);
+            document.getElementById("modalAiBadge").innerHTML = aiDilimRozetiUret(mSkor);
+            document.getElementById("detayModal").classList.remove("hidden");
+
+            const aksiyonKutusu = document.getElementById("isverenOzelAksiyonlar"); const ogrenciButonu = document.getElementById("btnOgrenciBasvuru");
+            aksiyonKutusu.classList.add("hidden"); ogrenciButonu.classList.add("hidden");
+
+            if (globalRol === "isveren") {
+                const ilanBenimMi = (ilanKullaniciId == globalKullaniciId) || (ilanSirketAdi === globalSirketAdi);
+                if (ilanBenimMi) {
+                    aksiyonKutusu.classList.remove("hidden");
+                    document.getElementById("btnIlanSil").onclick = () => ilanSilIstek(ilanId);
+                    document.getElementById("btnIlanGuncelle").onclick = () => ilanGuncelleForm(ilan);
+                    document.getElementById("btnBasvuranlar").onclick = () => { document.getElementById("detayModal").classList.add("hidden"); basvuranlariGetir(ilanId); };
+                }
+            } else {
+                ogrenciButonu.classList.remove("hidden"); ogrenciButonu.onclick = () => ilanBasvuruYap(ilan, ilanId);
+            }
+        }
+
+        async function ilanBasvuruYap(ilanObje, ilanId) {
+            if (!aktifKullanici || !aktifKullanici.cvOkul || !aktifKullanici.cvHedefIs || !aktifKullanici.telefon) {
+                alert("⚠️ Önce sağ üstten 'Profilim / CV' butonuna basarak bilgilerinizi kaydedin."); return;
+            }
+            let globalBasvurular = JSON.parse(localStorage.getItem("global_basvuru_havuzu")) || [];
+            if (globalBasvurular.some(b => b.ilanId == ilanId && b.kullaniciId == globalKullaniciId)) { alert("⚠️ Zaten başvurdunuz!"); return; }
+
+            const hesaplananSkor = gelismisAiSkorunuHesapla(ilanObje, aktifKullanici);
+            const yeniBasvuru = {
+                id: Date.now() + Math.floor(Math.random() * 1000), ilanId: parseInt(ilanId), kullaniciId: parseInt(globalKullaniciId),
+                adSoyad: aktifKullanici.adSoyad || `Öğrenci #${globalKullaniciId}`, eposta: aktifKullanici.eposta, telefon: aktifKullanici.telefon,
+                cvSehir: aktifKullanici.cvSehir, cvOkul: aktifKullanici.cvOkul, cvHedefIs: aktifKullanici.cvHedefIs,
+                cvYetenekler: aktifKullanici.cvYetenekler || [], cvTecrubeler: aktifKullanici.cvTecrubeler || [],
+                baslik: ilanObje.baslik || ilanObje.Baslik, sirketAdi: ilanObje.sirketAdi || ilanObje.SirketAdi, sehir: ilanObje.sehir || ilanObje.Sehir,
+                durum: "Beklemede", aiSkoru: hesaplananSkor
+            };
+
+            globalBasvurular.push(yeniBasvuru); localStorage.setItem("global_basvuru_havuzu", JSON.stringify(globalBasvurular));
+            alert(`🎉 Başvurunuz robot değerlendirmesiyle (%${hesaplananSkor} AI Uyumu) iletildi!`);
+            document.getElementById("detayModal").classList.add("hidden"); tumIlanlariGetir();
+        }
+
+        function basvuranlariGetir(ilanId) {
+            const listeKutusu = document.getElementById("basvuranlarListesi"); const arsivKutusu = document.getElementById("basvuruArsivListesi");
+            listeKutusu.innerHTML = ""; arsivKutusu.innerHTML = ""; document.getElementById("basvuranlarModal").classList.remove("hidden");
+
+            const globalBasvurular = JSON.parse(localStorage.getItem("global_basvuru_havuzu")) || [];
+            const buIlanaAitBasvurular = globalBasvurular.filter(b => b.ilanId == ilanId);
+            buIlanaAitBasvurular.sort((a, b) => b.aiSkoru - a.aiSkoru);
+
+            const bekleyenler = buIlanaAitBasvurular.filter(b => b.durum === "Beklemede");
+            const sonuclananlar = buIlanaAitBasvurular.filter(b => b.durum !== "Beklemede");
+
+            if (bekleyenler.length === 0) {
+                listeKutusu.innerHTML = `<div class="text-center text-gray-400 py-6 text-xs">İncelenmeyi bekleyen başvuru yok.</div>`;
+            } else {
+                bekleyenler.forEach(aday => {
+                    let skorRenk = "bg-red-50 text-red-700 border-red-100";
+                    if (aday.aiSkoru >= 80) skorRenk = "bg-emerald-50 text-emerald-700 border-emerald-100";
+                    else if (aday.aiSkoru >= 55) skorRenk = "bg-blue-50 text-blue-700 border-blue-100";
+
+                    listeKutusu.innerHTML += `
+                        <div class="border border-gray-100 p-4 rounded-xl bg-white flex flex-col gap-2">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-sm">${aday.adSoyad}</h4>
+                                    <p class="text-[11px] text-gray-500 font-medium">🎓 Okul: ${aday.cvOkul || '-'} | 🎯 Pozisyon: ${aday.cvHedefIs || '-'}</p>
+                                </div>
+                                <span class="${skorRenk} px-2 py-1 rounded-lg text-[11px] font-bold">🤖 %${aday.aiSkoru} Uyum</span>
+                            </div>
+                            <div class="flex justify-end gap-2 mt-2">
+                                <button onclick="durumDegistir(${aday.id}, ${ilanId}, 'Reddedildi')" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-100 cursor-pointer">Reddet</button>
+                                <button onclick="durumDegistir(${aday.id}, ${ilanId}, 'Onaylandi')" class="bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700 cursor-pointer">Onayla ve Kilitle</button>
+                            </div>
+                        </div>`;
+                });
+            }
+
+            sonuclananlar.forEach(aday => {
+                const isOnay = aday.durum === "Onaylandi";
+                let detayHTML = isOnay ? `<div class="mt-2 bg-emerald-50/50 p-3 rounded-lg border border-emerald-100 text-[11px] text-gray-700">📱 <b>Tel:</b> ${aday.telefon} | ✉️ <b>Mail:</b> ${aday.eposta} <br> 🛠️ <b>Donanımlar:</b> ${aday.cvYetenekler.join(', ')}</div>` : '';
+                arsivKutusu.innerHTML += `
+                    <div class="flex flex-col p-3 bg-gray-50 rounded-xl border border-gray-100 mb-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-gray-800 text-xs">${aday.adSoyad} (AI: %${aday.aiSkoru})</span>
+                            <span class="${isOnay ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'} px-2 py-0.5 rounded-full font-bold text-[10px]">${isOnay ? '✓ Onaylandı' : '✕ Reddedildi'}</span>
+                        </div>
+                        ${detayHTML}
+                    </div>`;
+            });
+        }
+
+        function durumDegistir(basvuruId, ilanId, yeniDurum) {
+            let globalBasvurular = JSON.parse(localStorage.getItem("global_basvuru_havuzu")) || [];
+            globalBasvurular.forEach(b => { if (b.id == basvuruId) b.durum = yeniDurum; });
+            localStorage.setItem("global_basvuru_havuzu", JSON.stringify(globalBasvurular));
+            alert(`💼 İşlem yapıldı!`); basvuranlariGetir(ilanId);
+        }
+
+        async function ilanGuncelleForm(ilan) {
+            const yeniBaslik = prompt("Yeni Başlık:", ilan.baslik || ilan.Baslik); const yeniAciklama = prompt("Yeni Açıklama:", ilan.aciklama || ilan.Aciklama);
+            if (!yeniBaslik || !yeniAciklama) return;
+            let yerelIlanlar = JSON.parse(localStorage.getItem("mock_ilanlar")) || [];
+            yerelIlanlar.forEach(i => { if ((i.id || i.Id) == (ilan.id || ilan.Id)) { i.Baslik = yeniBaslik; i.Aciklama = yeniAciklama; } });
+            localStorage.setItem("mock_ilanlar", JSON.stringify(yerelIlanlar));
+            alert("✏️ İlan güncellendi!"); document.getElementById("detayModal").classList.add("hidden"); tumIlanlariGetir();
+        }
+
+        async function ogrenciBasvurulariniGetir() {
+            const kutu = document.getElementById("ilanlarKutusu"); if (!kutu) return;
+            kutu.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500 animate-pulse">💼 Çekiliyor...</div>`;
+            document.getElementById("anaBaslik").innerText = "Yaptığım Staj Başvuruları";
+
+            const sistemdekiTumBasvurular = JSON.parse(localStorage.getItem("global_basvuru_havuzu")) || [];
+            const basvurular = sistemdekiTumBasvurular.filter(b => b.kullaniciId == globalKullaniciId);
+            document.getElementById("toplamIlanSayisi").innerText = basvurular.length; kutu.innerHTML = "";
+
+            if (basvurular.length === 0) {
+                kutu.innerHTML = `<div class="col-span-full text-center py-12 text-gray-400">Henüz başvurunuz yok.</div>`; return;
+            }
+
+            basvurular.forEach(b => {
+                let durumRenk = "bg-amber-100 text-amber-800 border-amber-200"; let durumMetin = "⏳ İnceleniyor (Beklemede)";
+                if (b.durum === "Onaylandi") { durumRenk = "bg-emerald-100 text-emerald-800 border-emerald-200 font-bold"; durumMetin = "🎉 Kabul Edildiniz (Onaylandı)"; }
+                else if (b.durum === "Reddedildi") { durumRenk = "bg-rose-100 text-rose-800 border-rose-200"; durumMetin = "❌ Başvuru Olumsuz Sonuçlandı"; }
+
+                kutu.innerHTML += `
+                    <div class="bg-white p-6 rounded-2xl shadow-xs border border-gray-100 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start">
+                                <span class="text-xs font-bold bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md">📍 ${b.sehir}</span>
+                                <span class="text-xs font-bold bg-purple-50 text-purple-600 px-2 py-1 rounded-md">🤖 Skor: %${b.aiSkoru}</span>
+                            </div>
+                            <h3 class="text-md font-bold text-gray-900 mt-3">${b.baslik}</h3>
+                            <p class="text-xs text-gray-600 font-medium mt-1">${b.sirketAdi}</p>
+                        </div>
+                        <div class="mt-5 pt-3 border-t border-gray-100"><div class="border text-center py-2 rounded-xl text-xs ${durumRenk}">${durumMetin}</div></div>
+                    </div>`;
+            });
+        }
+
+        function sadeceBenimIlanlarimiGetir() {
+            document.getElementById("anaBaslik").innerText = "Yayınladığım Staj Fırsatları";
+            ilanlariEkranaBas(tumIlanlarHavuzu.filter(ilan => {
+                const ilanSirket = (ilan.sirketAdi || ilan.SirketAdi || "").toLowerCase().trim();
+                return ilan.kullaniciId == globalKullaniciId || ilanSirket === globalSirketAdi;
+            }));
+        }
+
+        function ilanlariFiltrele() {
+            const aramaMetni = document.getElementById("aramaInput").value.toLowerCase();
+            const secilenSehir = document.getElementById("filtreSehir").value;
+            const filtrelenmis = tumIlanlarHavuzu.filter(ilan => {
+                const baslik = (ilan.baslik || ilan.Baslik || "").toLowerCase(); const sirket = (ilan.sirketAdi || ilan.SirketAdi || "").toLowerCase();
+                return (baslik.includes(aramaMetni) || sirket.includes(aramaMetni)) && (secilenSehir === "" || ilan.sehir === secilenSehir);
+            });
+            ilanlariEkranaBas(filtrelenmis);
+        }
+
+        async function istekIlanYayinla() {
+            const baslik = document.getElementById("ilanBaslik").value.trim(); const sehir = document.getElementById("ilanSehir").value.trim();
+            const aciklama = document.getElementById("ilanAciklama").value.trim(); const maas = document.getElementById("ilanMaas").value.trim();
+            const sirketAdi = document.getElementById("ilanSirket").value; if (!baslik || !sehir || !aciklama) { alert("⚠️ Eksik alanlar var!"); return; }
+
+            let yerelIlanlar = JSON.parse(localStorage.getItem("mock_ilanlar")) || [];
+            const yeniIlan = { Id: Date.now(), KullaniciId: globalKullaniciId, Baslik: baslik, Aciklama: aciklama, SirketAdi: sirketAdi, Sehir: sehir, Maas: maas || "Belirtilmemiş" };
+            yerelIlanlar.push(yeniIlan); localStorage.setItem("mock_ilanlar", JSON.stringify(yerelIlanlar));
+
+            alert("🎉 Staj ilanı yayınlandı!"); location.reload();
+        }
+
+        function temizleFiltreler() { document.getElementById("aramaInput").value = ""; document.getElementById("filtreSehir").value = ""; tumIlanlariGetir(); }
+        function oturumuKapat() { localStorage.removeItem("girisYapanKullanici"); window.location.href = "login.html"; }
+    </script>
+</body>
+</html>

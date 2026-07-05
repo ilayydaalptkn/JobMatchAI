@@ -1,0 +1,665 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "JobMatchAPI",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/Basvuru/listele": {
+      "get": {
+        "tags": [
+          "Basvuru"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Basvuru/ogrenci/{kullaniciId}": {
+      "get": {
+        "tags": [
+          "Basvuru"
+        ],
+        "parameters": [
+          {
+            "name": "kullaniciId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Basvuru/durum-degistir/{basvuruId}/{yeniDurum}": {
+      "post": {
+        "tags": [
+          "Basvuru"
+        ],
+        "parameters": [
+          {
+            "name": "basvuruId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "yeniDurum",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Ilan/basvuru-yap": {
+      "post": {
+        "tags": [
+          "Basvuru"
+        ],
+        "operationId": "BasvuruYapUnique",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Basvuru"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Basvuru"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Basvuru"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Basvuru/ai-analiz/{ilanId}/{kullaniciId}": {
+      "get": {
+        "tags": [
+          "Basvuru"
+        ],
+        "parameters": [
+          {
+            "name": "ilanId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "kullaniciId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Basvuru/login": {
+      "post": {
+        "tags": [
+          "Basvuru"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KullaniciGirisModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KullaniciGirisModel"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/KullaniciGirisModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Ilan/listele": {
+      "get": {
+        "tags": [
+          "Ilan"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Ilan/detay/{id}": {
+      "get": {
+        "tags": [
+          "Ilan"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Ilan/isveren/{isverenId}": {
+      "get": {
+        "tags": [
+          "Ilan"
+        ],
+        "parameters": [
+          {
+            "name": "isverenId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Ilan/basvuranlar/{ilanId}": {
+      "get": {
+        "tags": [
+          "Ilan"
+        ],
+        "parameters": [
+          {
+            "name": "ilanId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Ilan/bana-uygun/{kullaniciId}": {
+      "get": {
+        "tags": [
+          "Ilan"
+        ],
+        "parameters": [
+          {
+            "name": "kullaniciId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Ilan/dis-api-ilanlari": {
+      "get": {
+        "tags": [
+          "Ilan"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Ilan/bot-ile-kazici": {
+      "get": {
+        "tags": [
+          "Ilan"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Ilan/durum-guncelle": {
+      "post": {
+        "tags": [
+          "Ilan"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DurumGuncelleModel"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DurumGuncelleModel"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DurumGuncelleModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Ilan/ekle": {
+      "post": {
+        "tags": [
+          "Ilan"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Ilan"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Ilan"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Ilan"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Ilan/sil/{id}": {
+      "delete": {
+        "tags": [
+          "Ilan"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Ilan/guncelle/{id}": {
+      "put": {
+        "tags": [
+          "Ilan"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Ilan"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Ilan"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Ilan"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Kimlik/kayit": {
+      "post": {
+        "tags": [
+          "Kimlik"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Kullanici"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Kullanici"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Kullanici"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Kimlik/giris": {
+      "post": {
+        "tags": [
+          "Kimlik"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GirisModeli"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GirisModeli"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/GirisModeli"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Basvuru": {
+        "required": [
+          "IlanId",
+          "KullaniciId"
+        ],
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "KullaniciId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "IlanId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Durum": {
+            "type": "string",
+            "nullable": true
+          },
+          "BasvuruTarihi": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "AiSkoru": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "AiGeriBildirim": {
+            "type": "string",
+            "nullable": true
+          },
+          "AiNitelikOzeti": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DurumGuncelleModel": {
+        "type": "object",
+        "properties": {
+          "BasvuruId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "YeniDurum": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "GirisModeli": {
+        "type": "object",
+        "properties": {
+          "Eposta": {
+            "type": "string",
+            "nullable": true
+          },
+          "Sifre": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Ilan": {
+        "required": [
+          "Aciklama",
+          "Baslik",
+          "SirketAdi"
+        ],
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "KullaniciId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Baslik": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "Aciklama": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "SirketAdi": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "Sehir": {
+            "type": "string",
+            "nullable": true
+          },
+          "Maas": {
+            "type": "string",
+            "nullable": true
+          },
+          "YayinlanmaTarihi": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "YapayZekaSkoru": {
+            "type": "string",
+            "nullable": true
+          },
+          "EslesmeNedeni": {
+            "type": "string",
+            "nullable": true
+          },
+          "EksikYetenekler": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Kullanici": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "AdSoyad": {
+            "type": "string",
+            "nullable": true
+          },
+          "Eposta": {
+            "type": "string",
+            "nullable": true
+          },
+          "Sifre": {
+            "type": "string",
+            "nullable": true
+          },
+          "Sehir": {
+            "type": "string",
+            "nullable": true
+          },
+          "Rol": {
+            "type": "string",
+            "nullable": true
+          },
+          "KayitTarihi": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "KullaniciGirisModel": {
+        "type": "object",
+        "properties": {
+          "Eposta": {
+            "type": "string",
+            "nullable": true
+          },
+          "Sifre": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

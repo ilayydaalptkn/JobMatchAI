@@ -1,0 +1,314 @@
+[
+  {
+    "ContainingType": "JobMatchAPI.Controllers.BasvuruController",
+    "Method": "RealAiAnaliz",
+    "RelativePath": "api/Basvuru/ai-analiz/{ilanId}/{kullaniciId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ilanId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "kullaniciId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.BasvuruController",
+    "Method": "DurumDegistir",
+    "RelativePath": "api/Basvuru/durum-degistir/{basvuruId}/{yeniDurum}",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "basvuruId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "yeniDurum",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.BasvuruController",
+    "Method": "Listele",
+    "RelativePath": "api/Basvuru/listele",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.BasvuruController",
+    "Method": "Login",
+    "RelativePath": "api/Basvuru/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "JobMatchAPI.Controllers.KullaniciGirisModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.BasvuruController",
+    "Method": "GetOgrenciBasvurulari",
+    "RelativePath": "api/Basvuru/ogrenci/{kullaniciId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "kullaniciId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.IlanController",
+    "Method": "GetBanaUygunIlanlar",
+    "RelativePath": "api/Ilan/bana-uygun/{kullaniciId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "kullaniciId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.IlanController",
+    "Method": "GetIlanBasvuranlar",
+    "RelativePath": "api/Ilan/basvuranlar/{ilanId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "ilanId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.BasvuruController",
+    "Method": "BasvuruYap",
+    "RelativePath": "api/Ilan/basvuru-yap",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "yeniBasvuru",
+        "Type": "JobMatchAPI.Models.Basvuru",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [],
+    "EndpointName": "BasvuruYapUnique"
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.IlanController",
+    "Method": "BasvuruYap",
+    "RelativePath": "api/Ilan/basvuru-yap",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "yeniBasvuru",
+        "Type": "JobMatchAPI.Models.Basvuru",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.IlanController",
+    "Method": "GetBotIlanlari",
+    "RelativePath": "api/Ilan/bot-ile-kazici",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.IlanController",
+    "Method": "GetIlanDetay",
+    "RelativePath": "api/Ilan/detay/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.IlanController",
+    "Method": "GetDisApiIlanlari",
+    "RelativePath": "api/Ilan/dis-api-ilanlari",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.IlanController",
+    "Method": "DurumGuncelle",
+    "RelativePath": "api/Ilan/durum-guncelle",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "JobMatchAPI.Controllers.IlanController\u002BDurumGuncelleModel",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.IlanController",
+    "Method": "Ekle",
+    "RelativePath": "api/Ilan/ekle",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "yeniIlan",
+        "Type": "JobMatchAPI.Models.Ilan",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.IlanController",
+    "Method": "Guncelle",
+    "RelativePath": "api/Ilan/guncelle/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "guncelIlan",
+        "Type": "JobMatchAPI.Models.Ilan",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.IlanController",
+    "Method": "GetIsverenIlanlari",
+    "RelativePath": "api/Ilan/isveren/{isverenId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "isverenId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.IlanController",
+    "Method": "Listele",
+    "RelativePath": "api/Ilan/listele",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.IlanController",
+    "Method": "Sil",
+    "RelativePath": "api/Ilan/sil/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.KimlikController",
+    "Method": "GirisYap",
+    "RelativePath": "api/Kimlik/giris",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "JobMatchAPI.Controllers.GirisModeli",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobMatchAPI.Controllers.KimlikController",
+    "Method": "KayitOl",
+    "RelativePath": "api/Kimlik/kayit",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "yeniKullanici",
+        "Type": "JobMatchAPI.Models.Kullanici",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]
