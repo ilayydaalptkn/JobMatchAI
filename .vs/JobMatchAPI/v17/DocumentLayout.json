@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{9C234200-0124-43BE-8521-F16A01BDF5ED}|JobMatchAPI\\JobMatchAPI.csproj|c:\\users\\ilayd\\onedrive\\masa\u00FCst\u00FC\\jobmatchapi\\jobmatchapi\\wwwroot\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{9C234200-0124-43BE-8521-F16A01BDF5ED}|JobMatchAPI\\JobMatchAPI.csproj|solutionrelative:jobmatchapi\\wwwroot\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{9C234200-0124-43BE-8521-F16A01BDF5ED}|JobMatchAPI\\JobMatchAPI.csproj|c:\\users\\ilayd\\onedrive\\masa\u00FCst\u00FC\\jobmatchapi\\jobmatchapi\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{9C234200-0124-43BE-8521-F16A01BDF5ED}|JobMatchAPI\\JobMatchAPI.csproj|solutionrelative:jobmatchapi\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
@@ -13,10 +17,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{9C234200-0124-43BE-8521-F16A01BDF5ED}|JobMatchAPI\\JobMatchAPI.csproj|c:\\users\\ilayd\\onedrive\\masa\u00FCst\u00FC\\jobmatchapi\\jobmatchapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{9C234200-0124-43BE-8521-F16A01BDF5ED}|JobMatchAPI\\JobMatchAPI.csproj|solutionrelative:jobmatchapi\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{9C234200-0124-43BE-8521-F16A01BDF5ED}|JobMatchAPI\\JobMatchAPI.csproj|c:\\users\\ilayd\\onedrive\\masa\u00FCst\u00FC\\jobmatchapi\\jobmatchapi\\wwwroot\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{9C234200-0124-43BE-8521-F16A01BDF5ED}|JobMatchAPI\\JobMatchAPI.csproj|solutionrelative:jobmatchapi\\wwwroot\\index.html||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{9C234200-0124-43BE-8521-F16A01BDF5ED}|JobMatchAPI\\JobMatchAPI.csproj|c:\\users\\ilayd\\onedrive\\masa\u00FCst\u00FC\\jobmatchapi\\jobmatchapi\\wwwroot\\login.html||{40D31677-CBC0-4297-A9EF-89D907823A98}",
@@ -98,11 +98,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Dockerfile",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Dockerfile",
               "RelativeDocumentMoniker": "JobMatchAPI\\Dockerfile",
@@ -115,7 +115,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\appsettings.json",
               "RelativeDocumentMoniker": "JobMatchAPI\\appsettings.json",
@@ -123,8 +123,7 @@
               "RelativeToolTip": "JobMatchAPI\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2026-07-05T17:13:54.985Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-05T17:13:54.985Z"
             },
             {
               "$type": "Document",
@@ -140,13 +139,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 0,
               "Title": "index.html",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\wwwroot\\index.html",
               "RelativeDocumentMoniker": "JobMatchAPI\\wwwroot\\index.html",
               "ToolTip": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\wwwroot\\index.html",
               "RelativeToolTip": "JobMatchAPI\\wwwroot\\index.html",
-              "ViewState": "AgIAAO8CAAAAAAAAAAAiwPgCAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAANcAAAAAAAAAAAAuwOEAAABAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001512|",
               "WhenOpened": "2026-07-02T07:16:42.99Z",
               "EditorCaption": ""
@@ -189,7 +188,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Program.cs",
               "RelativeDocumentMoniker": "JobMatchAPI\\Program.cs",
@@ -197,8 +196,7 @@
               "RelativeToolTip": "JobMatchAPI\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAABDAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-02T07:16:45.75Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-07-02T07:16:45.75Z"
             },
             {
               "$type": "Document",

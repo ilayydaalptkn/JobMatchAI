@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{9C234200-0124-43BE-8521-F16A01BDF5ED}|JobMatchAPI\\JobMatchAPI.csproj|c:\\users\\ilayd\\onedrive\\masa\u00FCst\u00FC\\jobmatchapi\\jobmatchapi\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{9C234200-0124-43BE-8521-F16A01BDF5ED}|JobMatchAPI\\JobMatchAPI.csproj|solutionrelative:jobmatchapi\\dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{9C234200-0124-43BE-8521-F16A01BDF5ED}|JobMatchAPI\\JobMatchAPI.csproj|c:\\users\\ilayd\\onedrive\\masa\u00FCst\u00FC\\jobmatchapi\\jobmatchapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{9C234200-0124-43BE-8521-F16A01BDF5ED}|JobMatchAPI\\JobMatchAPI.csproj|solutionrelative:jobmatchapi\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
@@ -99,11 +103,24 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "Dockerfile",
+              "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Dockerfile",
+              "RelativeDocumentMoniker": "JobMatchAPI\\Dockerfile",
+              "ToolTip": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Dockerfile",
+              "RelativeToolTip": "JobMatchAPI\\Dockerfile",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-07-05T17:34:36.715Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\appsettings.json",
               "RelativeDocumentMoniker": "JobMatchAPI\\appsettings.json",
-              "ToolTip": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\appsettings.json*",
-              "RelativeToolTip": "JobMatchAPI\\appsettings.json*",
+              "ToolTip": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\appsettings.json",
+              "RelativeToolTip": "JobMatchAPI\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
               "WhenOpened": "2026-07-05T17:13:54.985Z",
@@ -111,7 +128,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "AiMatcherService.cs",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Services\\AiMatcherService.cs",
               "RelativeDocumentMoniker": "JobMatchAPI\\Services\\AiMatcherService.cs",
@@ -123,7 +140,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "index.html",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\wwwroot\\index.html",
               "RelativeDocumentMoniker": "JobMatchAPI\\wwwroot\\index.html",
@@ -136,7 +153,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "login.html",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\wwwroot\\login.html",
               "RelativeDocumentMoniker": "JobMatchAPI\\wwwroot\\login.html",
@@ -148,7 +165,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "IlanController.cs",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Controllers\\IlanController.cs",
               "RelativeDocumentMoniker": "JobMatchAPI\\Controllers\\IlanController.cs",
@@ -160,7 +177,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "Basvuru.cs",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Models\\Basvuru.cs",
               "RelativeDocumentMoniker": "JobMatchAPI\\Models\\Basvuru.cs",
@@ -172,7 +189,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Program.cs",
               "RelativeDocumentMoniker": "JobMatchAPI\\Program.cs",
@@ -185,7 +202,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "BasvuruController.cs",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Controllers\\BasvuruController.cs",
               "RelativeDocumentMoniker": "JobMatchAPI\\Controllers\\BasvuruController.cs",
@@ -197,7 +214,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "Ilan.cs",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Models\\Ilan.cs",
               "RelativeDocumentMoniker": "JobMatchAPI\\Models\\Ilan.cs",
@@ -209,7 +226,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 15,
               "Title": "KimlikController.cs",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Controllers\\KimlikController.cs",
               "RelativeDocumentMoniker": "JobMatchAPI\\Controllers\\KimlikController.cs",
@@ -221,7 +238,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "TumSitelerBotServisi.cs",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\ArkaPlanServisleri\\TumSitelerBotServisi.cs",
               "RelativeDocumentMoniker": "JobMatchAPI\\ArkaPlanServisleri\\TumSitelerBotServisi.cs",
@@ -233,7 +250,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 21,
               "Title": "20260702074142_SonVeritaban\u0131Esleme.cs",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Migrations\\20260702074142_SonVeritaban\u0131Esleme.cs",
               "RelativeDocumentMoniker": "JobMatchAPI\\Migrations\\20260702074142_SonVeritaban\u0131Esleme.cs",
@@ -245,7 +262,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "VeriTabaniBaglantisi.cs",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Data\\VeriTabaniBaglantisi.cs",
               "RelativeDocumentMoniker": "JobMatchAPI\\Data\\VeriTabaniBaglantisi.cs",
@@ -257,7 +274,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "StajSenkronizasyonServisi.cs",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\ArkaPlanServisleri\\StajSenkronizasyonServisi.cs",
               "RelativeDocumentMoniker": "JobMatchAPI\\ArkaPlanServisleri\\StajSenkronizasyonServisi.cs",
@@ -269,7 +286,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 14,
               "Title": "20260702073750_IlanYapayZekaAlanlariEkle.cs",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Migrations\\20260702073750_IlanYapayZekaAlanlariEkle.cs",
               "RelativeDocumentMoniker": "JobMatchAPI\\Migrations\\20260702073750_IlanYapayZekaAlanlariEkle.cs",
@@ -281,7 +298,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "20260702073857_KolonlariZorlaEkle.cs",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Migrations\\20260702073857_KolonlariZorlaEkle.cs",
               "RelativeDocumentMoniker": "JobMatchAPI\\Migrations\\20260702073857_KolonlariZorlaEkle.cs",
@@ -293,7 +310,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 16,
               "Title": "appsettings.Development.json",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\appsettings.Development.json",
               "RelativeDocumentMoniker": "JobMatchAPI\\appsettings.Development.json",
@@ -305,7 +322,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 17,
               "Title": "IsBasvurusu.cs",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Models\\IsBasvurusu.cs",
               "RelativeDocumentMoniker": "JobMatchAPI\\Models\\IsBasvurusu.cs",
@@ -317,7 +334,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 18,
               "Title": "Kullanici.cs",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\Models\\Kullanici.cs",
               "RelativeDocumentMoniker": "JobMatchAPI\\Models\\Kullanici.cs",
@@ -329,7 +346,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 19,
               "Title": "JobMatchAPI",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\JobMatchAPI.csproj",
               "RelativeDocumentMoniker": "JobMatchAPI\\JobMatchAPI.csproj",
@@ -340,7 +357,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 20,
               "Title": "JobMatchAPI.csproj",
               "DocumentMoniker": "C:\\Users\\ilayd\\OneDrive\\Masa\u00FCst\u00FC\\JobMatchAPI\\JobMatchAPI\\JobMatchAPI.csproj",
               "RelativeDocumentMoniker": "JobMatchAPI\\JobMatchAPI.csproj",
