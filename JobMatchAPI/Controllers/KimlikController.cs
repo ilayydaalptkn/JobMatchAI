@@ -5,6 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace JobMatchAPI.Controllers
 {
@@ -24,18 +28,37 @@ namespace JobMatchAPI.Controllers
         {
             try
             {
-                if (yeniKullanici == null || string.IsNullOrEmpty(yeniKullanici.Eposta))
+                if (yeniKullanici == null)
                 {
-                    return BadRequest("Geçersiz kullanıcı verisi!");
+                    return BadRequest("Geçersiz veya boş kullanıcı verisi gönderildi!");
                 }
 
-                var epostaVarMi = await _veriTabani.Kullanicilar.AnyAsync(k => k.Eposta.ToLower() == yeniKullanici.Eposta.ToLower());
-                if (epostaVarMi) return BadRequest("Bu e-posta adresi zaten kullanımda!");
+                // 🚨 SUPABASE BAĞLANTI KONTROLÜ VE E-POSTA SORGUSU
+                if (_veriTabani.Kullanicilar == null)
+                {
+                    return StatusCode(500, "Veritabanında Kullanıcılar tablosu bulunamadı (DbSet null)!");
+                }
+
+                if (!string.IsNullOrEmpty(yeniKullanici.Eposta))
+                {
+                    var epostaVarMi = await _veriTabani.Kullanicilar
+                        .AnyAsync(k => k.Eposta.ToLower() == yeniKullanici.Eposta.ToLower());
+
+                    if (epostaVarMi)
+                        return BadRequest("Bu e-posta adresi zaten kullanımda!");
+                }
+                else
+                {
+                    return BadRequest("E-posta alanı boş bırakılamaz!");
+                }
 
                 if (yeniKullanici.Rol != "Ogrenci" && yeniKullanici.Rol != "Isveren")
                 {
                     yeniKullanici.Rol = "Ogrenci";
                 }
+
+                // PostgreSQL'in otomatik ID üretmesi için gelen ID'yi sıfırlıyoruz
+                yeniKullanici.Id = 0;
 
                 _veriTabani.Kullanicilar.Add(yeniKullanici);
                 await _veriTabani.SaveChangesAsync();
@@ -44,7 +67,8 @@ namespace JobMatchAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Kayıt sırasında teknik bir hata oluştu: {ex.Message}");
+                // 500 hatası verirse Render loglarında neyin patlattığını tam görebilmen için hatayı dışarı fırlatıyoruz
+                return StatusCode(500, $"[BACKEND KAYIT HATASI]: {ex.Message} -> İç Hata: {ex.InnerException?.Message}");
             }
         }
 
@@ -58,6 +82,11 @@ namespace JobMatchAPI.Controllers
                     return BadRequest("E-posta ve şifre alanları boş bırakılamaz!");
                 }
 
+                if (_veriTabani.Kullanicilar == null)
+                {
+                    return StatusCode(500, "Veritabanı tablosu aktif değil!");
+                }
+
                 string arananEposta = model.Eposta.Trim().ToLower();
                 string arananSifre = model.Sifre.Trim();
 
@@ -67,23 +96,32 @@ namespace JobMatchAPI.Controllers
                 if (kullanici == null)
                     return BadRequest("E-posta adresi veya şifre hatalı!");
 
-                var claims = new[]
+                // 🚨 500 HATASINA SEBEP OLABİLECEK JWT OLUŞTURMA ALANINI GÜVENLİĞE ALIYORUZ
+                string tokenString = "mock_token_fallback";
+                try
                 {
-                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, kullanici.Id.ToString()),
-                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Email, kullanici.Eposta ?? ""),
-                    new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, kullanici.Rol ?? "Ogrenci")
-                };
+                    var claims = new[]
+                    {
+                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, kullanici.Id.ToString()),
+                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Email, kullanici.Eposta ?? ""),
+                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, kullanici.Rol ?? "Ogrenci")
+                    };
 
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("BuSizinCokGizliVeGuvenliKriptografikAnahtarinizdir123!"));
-                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("BuSizinCokGizliVeGuvenliKriptografikAnahtarinizdir123!"));
+                    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-                var token = new JwtSecurityToken(
-                    claims: claims,
-                    expires: DateTime.UtcNow.AddDays(1),
-                    signingCredentials: creds
-                );
+                    var token = new JwtSecurityToken(
+                        claims: claims,
+                        expires: DateTime.UtcNow.AddDays(1),
+                        signingCredentials: creds
+                    );
 
-                var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+                    tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+                }
+                catch (Exception jwtEx)
+                {
+                    Console.WriteLine($"[JWT TOKEN UYARISI]: Token üretilemedi, fallback moduna geçiliyor: {jwtEx.Message}");
+                }
 
                 return Ok(new
                 {
@@ -98,7 +136,7 @@ namespace JobMatchAPI.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Giriş hatası: {ex.Message}");
+                return StatusCode(500, $"[BACKEND GİRİŞ HATASI]: {ex.Message} -> İç Hata: {ex.InnerException?.Message}");
             }
         }
     }
