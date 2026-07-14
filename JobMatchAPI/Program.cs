@@ -1,4 +1,4 @@
-﻿using JobMatchAPI.Data;
+using JobMatchAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -78,7 +78,7 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<VeriTabaniBaglantisi>();
-        context.Database.EnsureCreated();
+        context.Database.Migrate();
 
         if (context.Ilanlar.Count() <= 2)
         {

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace JobMatchAPI.Migrations
 {
     [DbContext(typeof(VeriTabaniBaglantisi))]
-    [Migration("20260702074142_SonVeritabanıEsleme")]
-    partial class SonVeritabanıEsleme
+    [Migration("20260714083853_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,6 +33,15 @@ namespace JobMatchAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AiGeriBildirim")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AiNitelikOzeti")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("AiSkoru")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("BasvuruTarihi")
                         .HasColumnType("timestamp with time zone");
 
@@ -48,10 +57,12 @@ namespace JobMatchAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("KullaniciId");
+
                     b.ToTable("Basvurular");
                 });
 
-            modelBuilder.Entity("JobMatchAPI.Models.IsIlani", b =>
+            modelBuilder.Entity("JobMatchAPI.Models.Ilan", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -67,17 +78,6 @@ namespace JobMatchAPI.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("EksikYetenekler")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("EslesmeNedeni")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("KullaniciId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Maas")
                         .IsRequired()
                         .HasColumnType("text");
@@ -87,10 +87,6 @@ namespace JobMatchAPI.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("SirketAdi")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("YapayZekaSkoru")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -133,9 +129,24 @@ namespace JobMatchAPI.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Telefon")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.ToTable("Kullanicilar");
+                });
+
+            modelBuilder.Entity("JobMatchAPI.Models.Basvuru", b =>
+                {
+                    b.HasOne("JobMatchAPI.Models.Kullanici", "Kullanici")
+                        .WithMany()
+                        .HasForeignKey("KullaniciId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Kullanici");
                 });
 #pragma warning restore 612, 618
         }

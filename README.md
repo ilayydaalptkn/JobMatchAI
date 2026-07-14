@@ -37,7 +37,10 @@ Projenin geliştirilme sürecinde veri erişim katmanında (Data Access) şu kri
 
 ## 🚀 Kurulum ve Çalıştırma (Installation)
 
-🚀 [Uygulamayı Canlı Test Etmek İçin Tıklayın](https://ilayydaalptkn.github.io/JobMatchAI/index.html)
+🚀 **[Uygulamayı Canlı Test Et](https://ilayydaalptkn.github.io/JobMatchAI/login.html)**
+
+> İlk kez giriyorsanız **Kayıt Ol** sekmesinden hesap oluşturun, ardından giriş yapın.  
+> Render ücretsiz planda sunucu uyuyorsa ilk istek 30–60 saniye sürebilir; sayfayı yenileyip tekrar deneyin.
 
 1. Projeyi klonlayın:
    ```bash

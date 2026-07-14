@@ -1,2 +1,0 @@
-wwwroot\login.html
-wwwroot\index.html

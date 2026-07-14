@@ -269,7 +269,6 @@ C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\obj\Debug\net8.0\stat
 C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\obj\Debug\net8.0\staticwebassets.build.json.cache
 C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\obj\Debug\net8.0\JobMatch.E84A1143.Up2Date
 C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\obj\Debug\net8.0\JobMatchAPI.dll
 C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\obj\Debug\net8.0\refint\JobMatchAPI.dll
@@ -286,3 +285,4 @@ C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\bin\Debug\net8.0\Micr
 C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
 C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\bin\Debug\net8.0\System.Formats.Asn1.dll
 C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
+C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\obj\Debug\net8.0\JobMatchAPI.sourcelink.json
