@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "WrEdO63tW3Y=",
+  "dgSpecHash": "41yjQgQ5kn4=",
   "success": true,
-  "projectFilePath": "C:\\Users\\ilayd\\OneDrive\\Masaüstü\\JobMatchAPI\\JobMatchAPI\\JobMatchAPI.csproj",
+  "projectFilePath": "c:\\Users\\ilayd\\OneDrive\\Masaüstü\\JobMatchAPI\\JobMatchAPI\\JobMatchAPI.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\ilayd\\.nuget\\packages\\bcrypt.net-next\\4.0.3\\bcrypt.net-next.4.0.3.nupkg.sha512",
     "C:\\Users\\ilayd\\.nuget\\packages\\htmlagilitypack\\1.12.4\\htmlagilitypack.1.12.4.nupkg.sha512",
     "C:\\Users\\ilayd\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\ilayd\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\8.0.12\\microsoft.aspnetcore.authentication.jwtbearer.8.0.12.nupkg.sha512",

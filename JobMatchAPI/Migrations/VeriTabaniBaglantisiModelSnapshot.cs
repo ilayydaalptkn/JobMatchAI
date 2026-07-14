@@ -54,6 +54,8 @@ namespace JobMatchAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("IlanId");
+
                     b.HasIndex("KullaniciId");
 
                     b.ToTable("Basvurular");
@@ -75,6 +77,9 @@ namespace JobMatchAPI.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int?>("KullaniciId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Maas")
                         .IsRequired()
                         .HasColumnType("text");
@@ -92,6 +97,8 @@ namespace JobMatchAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("KullaniciId");
+
                     b.ToTable("Ilanlar");
                 });
 
@@ -104,6 +111,26 @@ namespace JobMatchAPI.Migrations
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("AdSoyad")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CvHedefIs")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CvOkul")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CvSehir")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CvTecrubeler")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("CvYetenekler")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -137,6 +164,12 @@ namespace JobMatchAPI.Migrations
 
             modelBuilder.Entity("JobMatchAPI.Models.Basvuru", b =>
                 {
+                    b.HasOne("JobMatchAPI.Models.Ilan", null)
+                        .WithMany()
+                        .HasForeignKey("IlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("JobMatchAPI.Models.Kullanici", "Kullanici")
                         .WithMany()
                         .HasForeignKey("KullaniciId")
@@ -144,6 +177,14 @@ namespace JobMatchAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Kullanici");
+                });
+
+            modelBuilder.Entity("JobMatchAPI.Models.Ilan", b =>
+                {
+                    b.HasOne("JobMatchAPI.Models.Kullanici", null)
+                        .WithMany()
+                        .HasForeignKey("KullaniciId")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 #pragma warning restore 612, 618
         }

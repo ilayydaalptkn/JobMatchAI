@@ -1,11 +1,11 @@
-﻿using JobMatchAPI.Data;
+using JobMatchAPI.Data;
+using JobMatchAPI.Helpers;
 using JobMatchAPI.Models;
+using JobMatchAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace JobMatchAPI.Controllers
 {
@@ -14,6 +14,7 @@ namespace JobMatchAPI.Controllers
     public class IlanController : ControllerBase
     {
         private readonly VeriTabaniBaglantisi _veriTabani;
+        private readonly AiMatcherService _aiService = new();
 
         public IlanController(VeriTabaniBaglantisi veriTabani)
         {
@@ -21,226 +22,300 @@ namespace JobMatchAPI.Controllers
         }
 
         [HttpGet("listele")]
-        public async Task<IActionResult> Listele()
+        [AllowAnonymous]
+        public async Task<IActionResult> Listele([FromQuery] int? kullaniciId)
         {
-            try
+            var ilanlar = await _veriTabani.Ilanlar.OrderByDescending(i => i.YayinlanmaTarihi).ToListAsync();
+
+            if (kullaniciId.HasValue)
             {
-                if (_veriTabani.Ilanlar == null) return Ok(new List<object>());
-                var ilanlar = await _veriTabani.Ilanlar.ToListAsync();
-                return Ok(ilanlar);
+                var ogrenci = await _veriTabani.Kullanicilar.FindAsync(kullaniciId.Value);
+                if (ogrenci != null)
+                {
+                    var cvMetni = AiMatcherService.CvMetniOlustur(ogrenci);
+                    ilanlar = ilanlar.Select(ilan =>
+                    {
+                        var sonuc = _aiService.CVAnalizEt(ilan.Aciklama + " " + ilan.Baslik, cvMetni);
+                        ilan.YapayZekaSkoru = sonuc.Skor;
+                        ilan.EslesmeNedeni = sonuc.GeriBildirim;
+                        return ilan;
+                    }).ToList();
+                }
             }
-            catch (Exception ex) { return StatusCode(500, $"Hata: {ex.Message}"); }
+
+            return Ok(ilanlar);
         }
 
         [HttpPost("basvuru-yap")]
-        public async Task<IActionResult> BasvuruYap([FromBody] Basvuru yeniBasvuru)
+        [Authorize(Roles = "Ogrenci")]
+        public async Task<IActionResult> BasvuruYap([FromBody] BasvuruYapModeli model)
         {
-            try
+            var ogrenciId = User.KullaniciIdAl();
+            var ilan = await _veriTabani.Ilanlar.FindAsync(model.IlanId);
+            var ogrenci = await _veriTabani.Kullanicilar.FindAsync(ogrenciId);
+
+            if (ilan == null || ogrenci == null)
+                return BadRequest("İlan veya kullanıcı bilgisi geçersiz.");
+
+            if (string.IsNullOrWhiteSpace(ogrenci.CvHedefIs) || string.IsNullOrWhiteSpace(ogrenci.CvOkul))
+                return BadRequest("Başvuru yapmadan önce CV profilinizi tamamlayın.");
+
+            var mevcutBasvuru = await _veriTabani.Basvurular
+                .AnyAsync(b => b.IlanId == model.IlanId && b.KullaniciId == ogrenciId);
+
+            if (mevcutBasvuru)
+                return BadRequest("Bu ilana zaten başvurdunuz.");
+
+            var cvMetni = AiMatcherService.CvMetniOlustur(ogrenci);
+            var aiSonuc = _aiService.CVAnalizEt(ilan.Aciklama + " " + ilan.Baslik, cvMetni);
+
+            var yeniBasvuru = new Basvuru
             {
-                var ilan = await _veriTabani.Ilanlar.FindAsync(yeniBasvuru.IlanId);
-                var ogrenci = await _veriTabani.Kullanicilar.FindAsync(yeniBasvuru.KullaniciId);
+                KullaniciId = ogrenciId,
+                IlanId = model.IlanId,
+                AiSkoru = aiSonuc.Skor,
+                AiGeriBildirim = aiSonuc.GeriBildirim,
+                AiNitelikOzeti = aiSonuc.NitelikOzeti,
+                BasvuruTarihi = DateTime.UtcNow,
+                Durum = "Beklemede"
+            };
 
-                if (ilan == null || ogrenci == null) return BadRequest("İlan veya kullanıcı bilgisi geçersiz.");
+            _veriTabani.Basvurular.Add(yeniBasvuru);
+            await _veriTabani.SaveChangesAsync();
 
-                var aiService = new AiMatcherService();
-                string ogrenciDetaylari = ogrenci.AdSoyad + " " + (ogrenci.Sehir ?? "");
-                var aiSonuc = aiService.CVAnalizEt(ilan.Aciklama, ogrenciDetaylari);
-
-                yeniBasvuru.AiSkoru = aiSonuc.Skor;
-                yeniBasvuru.AiGeriBildirim = aiSonuc.GeriBildirim;
-                yeniBasvuru.AiNitelikOzeti = aiSonuc.NitelikOzeti;
-                yeniBasvuru.BasvuruTarihi = DateTime.UtcNow;
-                yeniBasvuru.Durum = "Beklemede";
-
-                _veriTabani.Basvurular.Add(yeniBasvuru);
-                await _veriTabani.SaveChangesAsync();
-
-                return Ok(new { mesaj = "Başvuru ve Yapay Zeka Analizi Başarıyla Tamamlandı!", skor = aiSonuc.Skor, rapor = aiSonuc.GeriBildirim });
-            }
-            catch (Exception ex) { return StatusCode(500, $"Hata: {ex.Message}"); }
+            return Ok(new { mesaj = "Başvuru ve AI analizi tamamlandı!", skor = aiSonuc.Skor, rapor = aiSonuc.GeriBildirim });
         }
 
         [HttpGet("detay/{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetIlanDetay(int id)
         {
-            try
-            {
-                if (_veriTabani.Ilanlar == null) return NotFound("Tablo yok.");
-                var ilan = await _veriTabani.Ilanlar.FindAsync(id);
-                if (ilan == null) return NotFound($"İlan bulunamadı ID: {id}");
-                return Ok(ilan);
-            }
-            catch (Exception ex) { return StatusCode(500, $"Hata: {ex.Message}"); }
+            var ilan = await _veriTabani.Ilanlar.FindAsync(id);
+            if (ilan == null) return NotFound($"İlan bulunamadı ID: {id}");
+            return Ok(ilan);
         }
 
         [HttpGet("isveren/{isverenId}")]
+        [Authorize(Roles = "Isveren")]
         public async Task<IActionResult> GetIsverenIlanlari(int isverenId)
         {
-            try
-            {
-                if (_veriTabani.Ilanlar == null) return Ok(new List<object>());
-                var ilanlar = await _veriTabani.Ilanlar.Where(i => i.KullaniciId == isverenId).ToListAsync();
-                return Ok(ilanlar);
-            }
-            catch (Exception ex) { return StatusCode(500, $"Hata: {ex.Message}"); }
+            if (User.KullaniciIdAl() != isverenId)
+                return Forbid();
+
+            var ilanlar = await _veriTabani.Ilanlar
+                .Where(i => i.KullaniciId == isverenId)
+                .OrderByDescending(i => i.YayinlanmaTarihi)
+                .ToListAsync();
+
+            return Ok(ilanlar);
         }
 
         [HttpGet("basvuranlar/{ilanId}")]
+        [Authorize(Roles = "Isveren")]
         public async Task<IActionResult> GetIlanBasvuranlar(int ilanId)
         {
-            try
-            {
-                var basvuranAdaylar = await _veriTabani.Basvurular
-                    .Include(b => b.Kullanici)
-                    .Where(b => b.IlanId == ilanId)
-                    .Select(b => new {
-                        Id = b.Kullanici != null ? b.Kullanici.Id : 0,
-                        AdSoyad = b.Kullanici != null ? b.Kullanici.AdSoyad : "Bilinmeyen Aday",
-                        Eposta = b.Kullanici != null ? b.Kullanici.Eposta : "E-posta Yok",
-                        BasvuruId = b.Id,
-                        Durum = b.Durum,
-                        AiSkoru = b.AiSkoru ?? 0,
-                        AiGeriBildirim = b.AiGeriBildirim ?? "Analiz henüz yapılmadı.",
-                        AiNitelikOzeti = b.AiNitelikOzeti ?? "Özet bulunmuyor."
-                    }).ToListAsync();
+            var ilan = await _veriTabani.Ilanlar.FindAsync(ilanId);
+            if (ilan == null) return NotFound("İlan bulunamadı.");
 
-                return Ok(basvuranAdaylar);
-            }
-            catch (Exception ex) { return StatusCode(500, $"Hata: {ex.Message}"); }
+            if (ilan.KullaniciId != User.KullaniciIdAl())
+                return Forbid();
+
+            var basvuranAdaylar = await _veriTabani.Basvurular
+                .Include(b => b.Kullanici)
+                .Where(b => b.IlanId == ilanId)
+                .OrderByDescending(b => b.AiSkoru)
+                .Select(b => new
+                {
+                    Id = b.Kullanici != null ? b.Kullanici.Id : 0,
+                    AdSoyad = b.Kullanici != null ? b.Kullanici.AdSoyad : "Bilinmeyen Aday",
+                    Eposta = b.Kullanici != null ? b.Kullanici.Eposta : "",
+                    Telefon = b.Kullanici != null ? b.Kullanici.Telefon : "",
+                    CvOkul = b.Kullanici != null ? b.Kullanici.CvOkul : "",
+                    CvHedefIs = b.Kullanici != null ? b.Kullanici.CvHedefIs : "",
+                    CvSehir = b.Kullanici != null ? b.Kullanici.CvSehir : "",
+                    CvYetenekler = b.Kullanici != null ? b.Kullanici.CvYetenekler : "[]",
+                    CvTecrubeler = b.Kullanici != null ? b.Kullanici.CvTecrubeler : "[]",
+                    BasvuruId = b.Id,
+                    Durum = b.Durum,
+                    AiSkoru = b.AiSkoru ?? 0,
+                    AiGeriBildirim = b.AiGeriBildirim ?? "",
+                    AiNitelikOzeti = b.AiNitelikOzeti ?? ""
+                }).ToListAsync();
+
+            return Ok(basvuranAdaylar);
         }
 
         [HttpGet("bana-uygun/{kullaniciId}")]
+        [Authorize(Roles = "Ogrenci")]
         public async Task<IActionResult> GetBanaUygunIlanlar(int kullaniciId)
         {
-            try
+            if (User.KullaniciIdAl() != kullaniciId)
+                return Forbid();
+
+            var ogrenci = await _veriTabani.Kullanicilar.FindAsync(kullaniciId);
+            if (ogrenci == null) return NotFound("Öğrenci bulunamadı.");
+
+            var cvMetni = AiMatcherService.CvMetniOlustur(ogrenci);
+            var tumIlanlar = await _veriTabani.Ilanlar.ToListAsync();
+
+            var eslesenIlanlar = tumIlanlar.Select(ilan =>
             {
-                if (_veriTabani.Ilanlar == null) return Ok(new List<object>());
-                var ogrenci = await _veriTabani.Kullanicilar.FindAsync(kullaniciId);
-                if (ogrenci == null) return NotFound("Öğrenci bulunamadı.");
+                var aiSonuc = _aiService.CVAnalizEt(ilan.Aciklama + " " + ilan.Baslik, cvMetni);
+                return new
+                {
+                    ilan.Id,
+                    ilan.Baslik,
+                    ilan.SirketAdi,
+                    ilan.Sehir,
+                    ilan.Aciklama,
+                    ilan.Maas,
+                    HamSkor = aiSonuc.Skor,
+                    EslesmeNedeni = aiSonuc.GeriBildirim
+                };
+            })
+            .OrderByDescending(x => x.HamSkor)
+            .Select(x => new
+            {
+                x.Id,
+                x.Baslik,
+                x.SirketAdi,
+                x.Sehir,
+                x.Aciklama,
+                x.Maas,
+                YapayZekaSkoru = $"%{x.HamSkor}",
+                x.EslesmeNedeni
+            }).ToList();
 
-                var tumIlanlar = await _veriTabani.Ilanlar.ToListAsync();
-                var aiService = new AiMatcherService();
-                string ogrenciDetaylari = ogrenci.AdSoyad + " " + (ogrenci.Sehir ?? "");
-
-                var eslesenIlanlar = tumIlanlar.Select(ilan => {
-                    var aiSonuc = aiService.CVAnalizEt(ilan.Aciklama, ogrenciDetaylari);
-                    return new
-                    {
-                        Id = ilan.Id,
-                        Baslik = ilan.Baslik,
-                        SirketAdi = ilan.SirketAdi,
-                        Sehir = ilan.Sehir,
-                        HamSkor = aiSonuc.Skor,
-                        EslesmeNedeni = aiSonuc.GeriBildirim
-                    };
-                })
-                .OrderByDescending(x => x.HamSkor)
-                .Select(x => new {
-                    x.Id,
-                    x.Baslik,
-                    x.SirketAdi,
-                    x.Sehir,
-                    YapayZekaSkoru = $"%{x.HamSkor}",
-                    x.EslesmeNedeni
-                }).ToList();
-
-                return Ok(eslesenIlanlar);
-            }
-            catch (Exception ex) { return StatusCode(500, $"Hata: {ex.Message}"); }
-        }
-
-        [HttpGet("dis-api-ilanlari")]
-        public IActionResult GetDisApiIlanlari()
-        {
-            var kureselIlanlar = new List<object> {
-                new { id = 991, title = "Remote Full Stack Developer", company_name = "Arbeitnow Tech", location = "Uzaktan" },
-                new { id = 992, title = "Backend Intern (.NET)", company_name = "Berlin Software House", location = "Almanya" }
-            };
-            return Ok(kureselIlanlar);
-        }
-
-        [HttpGet("bot-ile-kazici")]
-        public IActionResult GetBotIlanlari()
-        {
-            var botIlanlar = new List<object> {
-                new { id = 881, baslik = "Cyber Security Trainee", sirketAdi = "Global Tech Labs", sehir = "Ankara", yapayZekaSkoru = "%92", eslesmeNedeni = "Bot kazıyıcı verisi." }
-            };
-            return Ok(botIlanlar);
+            return Ok(eslesenIlanlar);
         }
 
         [HttpPost("durum-guncelle")]
+        [Authorize(Roles = "Isveren")]
         public async Task<IActionResult> DurumGuncelle([FromBody] DurumGuncelleModel model)
         {
-            try
-            {
-                var basvuru = await _veriTabani.Basvurular.FindAsync(model.BasvuruId);
-                if (basvuru == null) return NotFound("Başvuru bulunamadı.");
+            var basvuru = await _veriTabani.Basvurular
+                .Include(b => b.Kullanici)
+                .FirstOrDefaultAsync(b => b.Id == model.BasvuruId);
 
-                basvuru.Durum = model.YeniDurum;
-                await _veriTabani.SaveChangesAsync();
+            if (basvuru == null) return NotFound("Başvuru bulunamadı.");
 
-                return Ok(new { mesaj = "Başvuru durumu başarıyla güncellendi." });
-            }
-            catch (Exception ex) { return StatusCode(500, $"Hata: {ex.Message}"); }
+            var ilan = await _veriTabani.Ilanlar.FindAsync(basvuru.IlanId);
+            if (ilan?.KullaniciId != User.KullaniciIdAl())
+                return Forbid();
+
+            if (model.YeniDurum is not ("Onaylandi" or "Reddedildi" or "Beklemede"))
+                return BadRequest("Geçersiz durum değeri.");
+
+            basvuru.Durum = model.YeniDurum;
+            await _veriTabani.SaveChangesAsync();
+
+            return Ok(new { mesaj = "Başvuru durumu güncellendi.", durum = basvuru.Durum });
         }
 
         [HttpPost("ekle")]
-        public async Task<IActionResult> Ekle([FromBody] JobMatchAPI.Models.Ilan yeniIlan)
+        [Authorize(Roles = "Isveren")]
+        public async Task<IActionResult> Ekle([FromBody] IlanEkleModeli model)
         {
-            try
-            {
-                if (yeniIlan == null) return BadRequest("İlan verisi boş olamaz.");
-                yeniIlan.Id = 0;
-                yeniIlan.YayinlanmaTarihi = DateTime.UtcNow;
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-                _veriTabani.Ilanlar.Add(yeniIlan);
-                await _veriTabani.SaveChangesAsync();
-                return Ok(yeniIlan);
-            }
-            catch (Exception ex) { return StatusCode(500, $"Veritabanına kaydedilirken hata oluştu: {ex.Message}"); }
+            var isveren = await _veriTabani.Kullanicilar.FindAsync(User.KullaniciIdAl());
+            if (isveren == null) return Unauthorized();
+
+            var yeniIlan = new Ilan
+            {
+                Baslik = model.Baslik.Trim(),
+                Aciklama = model.Aciklama.Trim(),
+                Sehir = model.Sehir.Trim(),
+                Maas = string.IsNullOrWhiteSpace(model.Maas) ? "Belirtilmemiş" : model.Maas.Trim(),
+                SirketAdi = isveren.AdSoyad,
+                KullaniciId = isveren.Id,
+                YayinlanmaTarihi = DateTime.UtcNow
+            };
+
+            _veriTabani.Ilanlar.Add(yeniIlan);
+            await _veriTabani.SaveChangesAsync();
+            return Ok(yeniIlan);
         }
 
         [HttpDelete("sil/{id}")]
+        [Authorize(Roles = "Isveren")]
         public async Task<IActionResult> Sil(int id)
         {
-            try
-            {
-                var ilan = await _veriTabani.Ilanlar.FindAsync(id);
-                if (ilan == null) return NotFound("İlan bulunamadı.");
+            var ilan = await _veriTabani.Ilanlar.FindAsync(id);
+            if (ilan == null) return NotFound("İlan bulunamadı.");
 
-                var basvurular = _veriTabani.Basvurular.Where(b => b.IlanId == id);
-                _veriTabani.Basvurular.RemoveRange(basvurular);
+            if (ilan.KullaniciId != User.KullaniciIdAl())
+                return Forbid();
 
-                _veriTabani.Ilanlar.Remove(ilan);
-                await _veriTabani.SaveChangesAsync();
-                return Ok("İlan ve ilgili başvurular başarıyla silindi.");
-            }
-            catch (Exception ex) { return StatusCode(500, $"Silme hatası: {ex.Message}"); }
+            var basvurular = _veriTabani.Basvurular.Where(b => b.IlanId == id);
+            _veriTabani.Basvurular.RemoveRange(basvurular);
+            _veriTabani.Ilanlar.Remove(ilan);
+            await _veriTabani.SaveChangesAsync();
+
+            return Ok(new { mesaj = "İlan ve ilgili başvurular silindi." });
         }
 
         [HttpPut("guncelle/{id}")]
-        public async Task<IActionResult> Guncelle(int id, [FromBody] JobMatchAPI.Models.Ilan guncelIlan)
+        [Authorize(Roles = "Isveren")]
+        public async Task<IActionResult> Guncelle(int id, [FromBody] IlanGuncelleModeli model)
         {
-            try
-            {
-                var ilan = await _veriTabani.Ilanlar.FindAsync(id);
-                if (ilan == null) return NotFound("İlan bulunamadı.");
+            var ilan = await _veriTabani.Ilanlar.FindAsync(id);
+            if (ilan == null) return NotFound("İlan bulunamadı.");
 
-                ilan.Baslik = guncelIlan.Baslik;
-                ilan.Aciklama = guncelIlan.Aciklama;
-                ilan.Sehir = guncelIlan.Sehir;
-                ilan.Maas = guncelIlan.Maas;
+            if (ilan.KullaniciId != User.KullaniciIdAl())
+                return Forbid();
 
-                await _veriTabani.SaveChangesAsync();
-                return Ok(ilan);
-            }
-            catch (Exception ex) { return StatusCode(500, $"Güncelleme hatası: {ex.Message}"); }
+            ilan.Baslik = model.Baslik.Trim();
+            ilan.Aciklama = model.Aciklama.Trim();
+            ilan.Sehir = model.Sehir.Trim();
+            ilan.Maas = model.Maas.Trim();
+
+            await _veriTabani.SaveChangesAsync();
+            return Ok(ilan);
+        }
+
+        public class BasvuruYapModeli
+        {
+            [Required]
+            public int IlanId { get; set; }
         }
 
         public class DurumGuncelleModel
         {
+            [Required]
             public int BasvuruId { get; set; }
-            public string YeniDurum { get; set; }
+
+            [Required]
+            public string YeniDurum { get; set; } = string.Empty;
+        }
+
+        public class IlanEkleModeli
+        {
+            [Required, MinLength(3)]
+            public string Baslik { get; set; } = string.Empty;
+
+            [Required]
+            public string Aciklama { get; set; } = string.Empty;
+
+            [Required]
+            public string Sehir { get; set; } = string.Empty;
+
+            public string Maas { get; set; } = string.Empty;
+        }
+
+        public class IlanGuncelleModeli
+        {
+            [Required, MinLength(3)]
+            public string Baslik { get; set; } = string.Empty;
+
+            [Required]
+            public string Aciklama { get; set; } = string.Empty;
+
+            [Required]
+            public string Sehir { get; set; } = string.Empty;
+
+            [Required]
+            public string Maas { get; set; } = string.Empty;
         }
     }
 }

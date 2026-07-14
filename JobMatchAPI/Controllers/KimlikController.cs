@@ -1,14 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using JobMatchAPI.Data;
 using JobMatchAPI.Models;
+using JobMatchAPI.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.IdentityModel.Tokens.Jwt;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace JobMatchAPI.Controllers
 {
@@ -17,133 +12,103 @@ namespace JobMatchAPI.Controllers
     public class KimlikController : ControllerBase
     {
         private readonly VeriTabaniBaglantisi _veriTabani;
+        private readonly JwtServisi _jwtServisi;
 
-        public KimlikController(VeriTabaniBaglantisi veriTabani)
+        public KimlikController(VeriTabaniBaglantisi veriTabani, JwtServisi jwtServisi)
         {
             _veriTabani = veriTabani;
+            _jwtServisi = jwtServisi;
         }
 
         [HttpPost("kayit")]
-        public async Task<IActionResult> KayitOl([FromBody] Kullanici yeniKullanici)
+        public async Task<IActionResult> KayitOl([FromBody] KayitModeli model)
         {
-            try
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var epostaVarMi = await _veriTabani.Kullanicilar
+                .AnyAsync(k => k.Eposta.ToLower() == model.Eposta.ToLower());
+
+            if (epostaVarMi)
+                return BadRequest("Bu e-posta adresi zaten kullanımda!");
+
+            var rol = model.Rol is "Ogrenci" or "Isveren" ? model.Rol : "Ogrenci";
+
+            var yeniKullanici = new Kullanici
             {
-                if (yeniKullanici == null)
-                {
-                    return BadRequest("Geçersiz veya boş kullanıcı verisi gönderildi!");
-                }
+                AdSoyad = model.AdSoyad.Trim(),
+                Eposta = model.Eposta.Trim().ToLower(),
+                Telefon = model.Telefon.Trim(),
+                Sifre = SifreServisi.Hashle(model.Sifre),
+                Sehir = model.Sehir.Trim(),
+                Rol = rol,
+                KayitTarihi = DateTime.UtcNow
+            };
 
-                // 🚨 SUPABASE BAĞLANTI KONTROLÜ VE E-POSTA SORGUSU
-                if (_veriTabani.Kullanicilar == null)
-                {
-                    return StatusCode(500, "Veritabanında Kullanıcılar tablosu bulunamadı (DbSet null)!");
-                }
+            _veriTabani.Kullanicilar.Add(yeniKullanici);
+            await _veriTabani.SaveChangesAsync();
 
-                if (!string.IsNullOrEmpty(yeniKullanici.Eposta))
-                {
-                    var epostaVarMi = await _veriTabani.Kullanicilar
-                        .AnyAsync(k => k.Eposta.ToLower() == yeniKullanici.Eposta.ToLower());
-
-                    if (epostaVarMi)
-                        return BadRequest("Bu e-posta adresi zaten kullanımda!");
-                }
-                else
-                {
-                    return BadRequest("E-posta alanı boş bırakılamaz!");
-                }
-
-                if (yeniKullanici.Rol != "Ogrenci" && yeniKullanici.Rol != "Isveren")
-                {
-                    yeniKullanici.Rol = "Ogrenci";
-                }
-
-                // PostgreSQL'in otomatik ID üretmesi için gelen ID'yi sıfırlıyoruz
-                yeniKullanici.Id = 0;
-
-                _veriTabani.Kullanicilar.Add(yeniKullanici);
-                await _veriTabani.SaveChangesAsync();
-
-                return Ok(new { mesaj = "Kayıt başarıyla tamamlandı!" });
-            }
-            catch (Exception ex)
-            {
-                // 500 hatası verirse Render loglarında neyin patlattığını tam görebilmen için hatayı dışarı fırlatıyoruz
-                return StatusCode(500, $"[BACKEND KAYIT HATASI]: {ex.Message} -> İç Hata: {ex.InnerException?.Message}");
-            }
+            return Ok(new { mesaj = "Kayıt başarıyla tamamlandı!" });
         }
 
         [HttpPost("giris")]
         public async Task<IActionResult> GirisYap([FromBody] GirisModeli model)
         {
-            try
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var kullanici = await _veriTabani.Kullanicilar
+                .FirstOrDefaultAsync(k => k.Eposta.ToLower() == model.Eposta.Trim().ToLower());
+
+            if (kullanici == null || !SifreServisi.Dogrula(model.Sifre.Trim(), kullanici.Sifre))
+                return BadRequest("E-posta adresi veya şifre hatalı!");
+
+            if (SifreServisi.HashGerekliMi(kullanici.Sifre))
             {
-                if (model == null || string.IsNullOrEmpty(model.Eposta) || string.IsNullOrEmpty(model.Sifre))
-                {
-                    return BadRequest("E-posta ve şifre alanları boş bırakılamaz!");
-                }
-
-                if (_veriTabani.Kullanicilar == null)
-                {
-                    return StatusCode(500, "Veritabanı tablosu aktif değil!");
-                }
-
-                string arananEposta = model.Eposta.Trim().ToLower();
-                string arananSifre = model.Sifre.Trim();
-
-                var kullanici = await _veriTabani.Kullanicilar
-                    .FirstOrDefaultAsync(k => k.Eposta.ToLower() == arananEposta && k.Sifre == arananSifre);
-
-                if (kullanici == null)
-                    return BadRequest("E-posta adresi veya şifre hatalı!");
-
-                // 🚨 500 HATASINA SEBEP OLABİLECEK JWT OLUŞTURMA ALANINI GÜVENLİĞE ALIYORUZ
-                string tokenString = "mock_token_fallback";
-                try
-                {
-                    var claims = new[]
-                    {
-                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.NameIdentifier, kullanici.Id.ToString()),
-                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Email, kullanici.Eposta ?? ""),
-                        new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, kullanici.Rol ?? "Ogrenci")
-                    };
-
-                    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("BuSizinCokGizliVeGuvenliKriptografikAnahtarinizdir123!"));
-                    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-                    var token = new JwtSecurityToken(
-                        claims: claims,
-                        expires: DateTime.UtcNow.AddDays(1),
-                        signingCredentials: creds
-                    );
-
-                    tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-                }
-                catch (Exception jwtEx)
-                {
-                    Console.WriteLine($"[JWT TOKEN UYARISI]: Token üretilemedi, fallback moduna geçiliyor: {jwtEx.Message}");
-                }
-
-                return Ok(new
-                {
-                    mesaj = "Giriş başarılı!",
-                    token = tokenString,
-                    id = kullanici.Id,
-                    adSoyad = kullanici.AdSoyad,
-                    eposta = kullanici.Eposta,
-                    sehir = kullanici.Sehir,
-                    rol = kullanici.Rol
-                });
+                kullanici.Sifre = SifreServisi.Hashle(model.Sifre.Trim());
+                await _veriTabani.SaveChangesAsync();
             }
-            catch (Exception ex)
+
+            return Ok(new
             {
-                return StatusCode(500, $"[BACKEND GİRİŞ HATASI]: {ex.Message} -> İç Hata: {ex.InnerException?.Message}");
-            }
+                mesaj = "Giriş başarılı!",
+                token = _jwtServisi.TokenUret(kullanici),
+                id = kullanici.Id,
+                adSoyad = kullanici.AdSoyad,
+                eposta = kullanici.Eposta,
+                telefon = kullanici.Telefon,
+                sehir = kullanici.Sehir,
+                rol = kullanici.Rol
+            });
         }
+    }
+
+    public class KayitModeli
+    {
+        [Required, MinLength(2)]
+        public string AdSoyad { get; set; } = string.Empty;
+
+        [Required, EmailAddress]
+        public string Eposta { get; set; } = string.Empty;
+
+        [Required, MinLength(10)]
+        public string Telefon { get; set; } = string.Empty;
+
+        [Required, MinLength(8)]
+        public string Sifre { get; set; } = string.Empty;
+
+        [Required]
+        public string Sehir { get; set; } = string.Empty;
+
+        public string Rol { get; set; } = "Ogrenci";
     }
 
     public class GirisModeli
     {
+        [Required, EmailAddress]
         public string Eposta { get; set; } = string.Empty;
+
+        [Required]
         public string Sifre { get; set; } = string.Empty;
     }
 }

@@ -286,3 +286,4 @@ C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\bin\Debug\net8.0\Micr
 C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\bin\Debug\net8.0\System.Formats.Asn1.dll
 C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll
 C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\obj\Debug\net8.0\JobMatchAPI.sourcelink.json
+C:\Users\ilayd\OneDrive\Masaüstü\JobMatchAPI\JobMatchAPI\bin\Debug\net8.0\BCrypt.Net-Next.dll

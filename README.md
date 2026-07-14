@@ -1,47 +1,151 @@
-# 🚀 JobMatch AI — Staj & Aday Eşleştirme Platformu
+# JobMatch AI — Staj & Aday Eşleştirme Platformu
 
-JobMatch AI, öğrenci özgeçmişleri (CV) ile işveren staj ilanlarını **gelişmiş semantik analiz algoritması** kullanarak dinamik olarak eşleştiren, gerçek zamanlı bildirim ve aday havuzu yönetimi sunan web tabanlı bir platformdur.
+JobMatch AI, öğrenci CV'leri ile işveren staj ilanlarını **kural tabanlı AI eşleştirme motoru** ile analiz eden, gerçek zamanlı bildirim ve aday havuzu yönetimi sunan full-stack bir platformdur.
 
----
-
-## ✨ Öne Çıkan Özellikler (Core Features)
-
-* **🧠 Gelişmiş AI Eşleştirme Motoru:** Kelime köklerini analiz ederek yetenek, konum ve pozisyon bazlı %0-%100 arası akıllı uyum skoru hesaplar.
-* **🔔 Canlı Takip & Bildirim Merkezi:** İşveren başvuru durumunu (Onay/Red) güncellediği an öğrenci ekranında mikro-animasyonlu canlı popup bildirimleri tetiklenir.
-* **👥 Global Yetenek Havuzu (Talent Pool):** İşverenlerin sistemdeki tüm adayları yeteneklerine ve şehirlerine göre anlık (event-driven) filtreleyebileceği gelişmiş arama modülü.
-* **🎨 Premium UI/UX Tasarımı:** Tailwind CSS ile güçlendirilmiş, `hover:scale` mikro etkileşimleri ve modern katman efektleri içeren arayüz.
+**Canlı Demo:** [login.html](https://ilayydaalptkn.github.io/JobMatchAI/login.html)
 
 ---
 
-## 🏗️ Kullanılan Teknolojiler (Tech Stack)
+## Demo Hesaplar
 
-### **Backend & Veri Katmanı**
-* **C# / .NET Core Web API:** Kurumsal ve ölçeklenebilir backend mimarisi.
-* **Entity Framework Core (EF Core):** Veritabanı erişimi ve ORM yönetimi.
-* **SQL Server:** İlişkisel veritabanı şeması ve Referential Integrity kontrolü.
+| Rol | E-posta | Şifre |
+|-----|---------|-------|
+| Öğrenci | `demo@jobmatch.ai` | `Demo123!` |
+| İşveren | `isveren@jobmatch.ai` | `Demo123!` |
 
-### **Frontend & Tasarım**
-* **HTML5 / JavaScript (ES6+):** Asenkron durum yönetimi ve event-driven arayüz.
-* **Tailwind CSS:** Premium ve mikro-animasyonlu responsive arayüz tasarımı.
+> Render ücretsiz planda sunucu uyuyorsa ilk istek 30–60 saniye sürebilir.
 
 ---
 
-## 🔬 Mimari Yaklaşımlar ve Optimizasyonlar
+## Mimari
 
-Projenin geliştirilme sürecinde veri erişim katmanında (Data Access) şu kritik mühendislik çözümleri uygulanmıştır:
-1.  **Eager Loading Stratejisi:** SQL tarafında `N+1 sorgu problemini` engellemek amacıyla `.Include(b => b.Kullanici)` kullanılarak veriler tek bir `INNER JOIN` ile asenkron çekilmiştir.
-2.  **Circular Reference Engellenmesi:** Nesnelerin serileştirilmesi (Serialization) esnasında Swagger'ı kilitleyen sonsuz döngü problemi `[JsonIgnore]` özniteliği ile çözülmüştür.
-3.  **İleri Düzey Hata Yönetimi:** Veritabanı kısıtlama ihlallerini izole etmek için loglama altyapısına `ex.InnerException` katmanı eklenmiştir.
+```
+GitHub Pages (Frontend)  →  Render (ASP.NET Core API)  →  Supabase (PostgreSQL)
+                              ↕
+                         Adzuna / Jobicy API (ilan botu)
+```
+
+| Katman | Teknoloji |
+|--------|-----------|
+| Frontend | HTML5, JavaScript, Tailwind CSS |
+| Backend | C# .NET 8 Web API, JWT Auth |
+| Veritabanı | PostgreSQL (Supabase), EF Core |
+| Deploy | GitHub Pages + Render + Docker |
 
 ---
 
-## 🚀 Kurulum ve Çalıştırma (Installation)
+## Özellikler
 
-🚀 **[Uygulamayı Canlı Test Et](https://ilayydaalptkn.github.io/JobMatchAI/login.html)**
+- JWT tabanlı kimlik doğrulama ve rol yönetimi (Öğrenci / İşveren)
+- BCrypt ile şifre hashleme
+- CV profil yönetimi (yetenekler, tecrübeler, hedef pozisyon)
+- Kural tabanlı AI uyum skoru (%0–100)
+- İlan yayınlama, başvuru, onay/red akışı
+- İşveren aday havuzu (yetenek ve şehir filtresi)
+- Arka plan ilan botu (Adzuna + Jobicy API)
+- Canlı başvuru bildirimleri
 
-> İlk kez giriyorsanız **Kayıt Ol** sekmesinden hesap oluşturun, ardından giriş yapın.  
-> Render ücretsiz planda sunucu uyuyorsa ilk istek 30–60 saniye sürebilir; sayfayı yenileyip tekrar deneyin.
+---
 
-1. Projeyi klonlayın:
-   ```bash
-   git clone [https://github.com/ilayydaalptkn/JobMatchAI.git](https://github.com/ilayydaalptkn/JobMatchAI.git)
+## API Endpoints
+
+### Kimlik (Anonim)
+| Method | Endpoint | Açıklama |
+|--------|----------|----------|
+| POST | `/api/Kimlik/kayit` | Yeni kullanıcı kaydı |
+| POST | `/api/Kimlik/giris` | Giriş + JWT token |
+
+### CV (JWT gerekli)
+| Method | Endpoint | Açıklama |
+|--------|----------|----------|
+| GET | `/api/Cv/profil` | CV profilini getir |
+| PUT | `/api/Cv/profil` | CV profilini güncelle |
+
+### İlanlar
+| Method | Endpoint | Rol | Açıklama |
+|--------|----------|-----|----------|
+| GET | `/api/Ilan/listele` | Anonim | Tüm ilanlar |
+| GET | `/api/Ilan/listele?kullaniciId=1` | Anonim | AI skorlu ilanlar |
+| POST | `/api/Ilan/ekle` | İşveren | İlan oluştur |
+| POST | `/api/Ilan/basvuru-yap` | Öğrenci | Başvuru yap |
+| GET | `/api/Ilan/basvuranlar/{ilanId}` | İşveren | Başvuranları listele |
+| POST | `/api/Ilan/durum-guncelle` | İşveren | Başvuru durumu güncelle |
+
+### Başvurular (JWT gerekli)
+| Method | Endpoint | Rol | Açıklama |
+|--------|----------|-----|----------|
+| GET | `/api/Basvuru/ogrenci/{id}` | Öğrenci | Kendi başvuruları |
+
+### Aday Havuzu (JWT + İşveren)
+| Method | Endpoint | Açıklama |
+|--------|----------|----------|
+| GET | `/api/Aday/havuz?yetenek=react&sehir=ankara` | Filtrelenmiş adaylar |
+
+---
+
+## Yerel Kurulum
+
+### Gereksinimler
+- .NET 8 SDK
+- PostgreSQL (veya Supabase hesabı)
+
+### Adımlar
+
+```bash
+git clone https://github.com/ilayydaalptkn/JobMatchAI.git
+cd JobMatchAI/JobMatchAPI
+
+# appsettings.Development.json içine connection string ekle
+dotnet ef database update
+dotnet run
+```
+
+API: `http://localhost:5000/swagger`
+
+Frontend: `index.html` ve `login.html` dosyalarını tarayıcıda açın.
+
+---
+
+## Render Deploy
+
+Environment variables ayarlayın (`.env.example` dosyasına bakın):
+
+```
+ConnectionStrings__DefaultConnection=<supabase-connection-string>
+JWT_KEY=<güçlü-32+-karakter-anahtar>
+```
+
+---
+
+## Testler
+
+```bash
+dotnet test JobMatchAPI.Tests/JobMatchAPI.Tests.csproj
+```
+
+GitHub Actions CI her push'ta otomatik build ve test çalıştırır.
+
+---
+
+## Proje Yapısı
+
+```
+JobMatchAI/
+├── index.html              # Ana uygulama (öğrenci/işveren paneli)
+├── login.html              # Giriş ve kayıt
+├── JobMatchAPI/
+│   ├── Controllers/        # API endpoint'leri
+│   ├── Services/           # AI matcher, JWT, şifre hash
+│   ├── Models/             # Veritabanı modelleri
+│   ├── Data/               # EF Core DbContext
+│   ├── Migrations/         # Veritabanı migration'ları
+│   └── ArkaPlanServisleri/ # İlan botu
+├── JobMatchAPI.Tests/      # Unit + integration testler
+└── .github/workflows/      # CI pipeline
+```
+
+---
+
+## Lisans
+
+MIT — Portfolyo ve eğitim amaçlı kullanım için uygundur.
